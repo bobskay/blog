@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<!-- saved from url=(0027)http://127.0.0.1:8080/index -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>欢迎</title>
+
+    <link href="./main_files/bootstrap.min.css" rel="stylesheet">
+	<link href="./main_files/bootstrap-table.css" rel="stylesheet">
+	<link href="./main_files/bootstrap-treeview.min.css" rel="stylesheet">
+    <link href="./main_files/index.css" rel="stylesheet">
+
+  <style type="text/css" id="tree-style"> .treeview .list-group-item{cursor:pointer}.treeview span.indent{margin-left:10px;margin-right:10px}.treeview span.icon{width:12px;margin-right:5px}.treeview .node-disabled{color:silver;cursor:not-allowed}.node-tree{}.node-tree:not(.node-disabled):hover{background-color:#F5F5F5;} </style></head>
+
+  <body class="" style="">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://127.0.0.1:8080/index#" th:text="${appName}"></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <!--<li><a href="#" onclick='logout()'>注销</a></li>-->
+          </ul>
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar" style="padding: 5px">
+       		 <div id="tree" class="treeview"><ul class="list-group"><li class="list-group-item node-tree" data-nodeid="0" style="color:undefined;background-color:undefined;"><span class="icon expand-icon glyphicon glyphicon-minus"></span><span class="icon node-icon"></span>BasicErrorController</li><li class="list-group-item node-tree" data-nodeid="1" style="color:undefined;background-color:undefined;"><span class="indent"></span><span class="icon glyphicon"></span><span class="icon node-icon"></span>errorHtml</li><li class="list-group-item node-tree" data-nodeid="2" style="color:undefined;background-color:undefined;"><span class="indent"></span><span class="icon glyphicon"></span><span class="icon node-icon"></span>error</li><li class="list-group-item node-tree" data-nodeid="3" style="color:undefined;background-color:undefined;"><span class="icon expand-icon glyphicon glyphicon-minus"></span><span class="icon node-icon"></span>HelloController</li><li class="list-group-item node-tree" data-nodeid="4" style="color:undefined;background-color:undefined;"><span class="indent"></span><span class="icon glyphicon"></span><span class="icon node-icon"></span>hello</li><li class="list-group-item node-tree" data-nodeid="5" style="color:undefined;background-color:undefined;"><span class="icon expand-icon glyphicon glyphicon-minus"></span><span class="icon node-icon"></span>BookController</li><li class="list-group-item node-tree" data-nodeid="6" style="color:undefined;background-color:undefined;"><span class="indent"></span><span class="icon glyphicon"></span><span class="icon node-icon"></span>selectJs</li><li class="list-group-item node-tree node-selected" data-nodeid="7" style="color:#FFFFFF;background-color:#428bca;"><span class="indent"></span><span class="icon glyphicon"></span><span class="icon node-icon"></span>select</li></ul></div>  	 
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" id="main" style="padding: 5px">
+<div class="panel panel-default">
+ <div class="panel-heading"><label>查询图书信息</label>&nbsp;:&nbsp;<label>/book/select</label></div>
+ <div class="panel-body">
+
+	<ul id="myTab" class="nav nav-tabs">
+		<li class="active">
+			<a href="http://127.0.0.1:8080/index#info" data-toggle="tab" aria-expanded="true">
+				 描述
+			</a>
+		</li>
+		<li class=""><a href="http://127.0.0.1:8080/index#debug" data-toggle="tab" aria-expanded="false">测试</a></li>
+		
+	</ul>
+	<div id="myTabContent" class="tab-content">
+		<div class="tab-pane fade active in" id="info">
+			<div class="panel panel-default">
+				<table class="table table-bordered">
+					<tbody><tr>
+						<td width="10%" align="left">
+							<label>描述</label>
+						</td>
+						<td width="20%">查询图书信息</td>
+						<td width="10%">method</td>
+						<td width="60%">com.example.demo.book.BookController.select</td>
+					</tr>
+					<tr>
+						<td width="10%">requestMethod</td>
+						<td width="20%">ALL</td>
+						<td width="10%">contentType</td>
+						<td width="60%">application/json;charset=UTF-8</td>
+					</tr>
+				</tbody></table>
+			</div>
+			
+			<div class="panel panel-default">
+			  <div class="panel-heading">参数列表</div>
+			  <div class="panel-body">
+			    <table class="table table-bordered">
+			    	<tbody><tr>
+			    		<th colspan="3" width="20%">名称</th>
+			    		<th width="30%">类型</th>
+			    		<th width="50%">说明</th>
+			    	</tr>
+			    				    	<tr>
+			    		<td colspan="3">selector</td>
+			    		<td>com.example.demo.book.BookSelector</td>
+			    		<td>查询条件</td>
+			    	</tr>
+			    						    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="2">bookInfo</td>
+				    		<td>com.example.demo.book.BookInfo</td>
+				    		<td>图书信息</td>
+				    	</tr>
+					    						    	<tr>
+					    		<td>&nbsp;</td>
+					    		<td>&nbsp;</td>
+					    		<td>bookName</td>
+					    		<td>java.lang.String</td>
+					    		<td>书名</td>
+					    	</tr>
+					    						    	<tr>
+					    		<td>&nbsp;</td>
+					    		<td>&nbsp;</td>
+					    		<td>publication</td>
+					    		<td>java.util.Date</td>
+					    		<td>出版日期</td>
+					    	</tr>
+					    						    	<tr>
+					    		<td>&nbsp;</td>
+					    		<td>&nbsp;</td>
+					    		<td>isbn</td>
+					    		<td>java.lang.String</td>
+					    		<td>标准图书编号</td>
+					    	</tr>
+					    						    	<tr>
+					    		<td>&nbsp;</td>
+					    		<td>&nbsp;</td>
+					    		<td>createTime</td>
+					    		<td>java.util.Date</td>
+					    		<td>创建时间</td>
+					    	</tr>
+					    							    	
+				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="2">minPrice</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>最低价格</td>
+				    	</tr>
+					    							    	
+				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="2">maxPrice</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>最高价</td>
+				    	</tr>
+					    							    	
+				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="2">offset</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>offset</td>
+				    	</tr>
+					    							    	
+				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="2">limit</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>limit</td>
+				    	</tr>
+					    							    	
+				    				    				    				    </tbody></table>
+			  </div>
+			</div>
+			
+			<div class="panel panel-default">
+			  <div class="panel-heading">返回值</div>
+			  <div class="panel-body">
+			   <table class="table table-bordered">
+			    	<tbody><tr>
+			    		<th colspan="4" width="20%">名称</th>
+			    		<th width="30%">类型</th>
+			    		<th width="50%">说明</th>
+			    	</tr>
+			    	<tr>
+			    		<td colspan="4">return</td>
+			    		<td>com.example.demo.book.Page&lt;com.example.demo.book.BookInfo&gt;</td>
+			    		<td>查询结果</td>
+			    	</tr>
+			    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="3">result</td>
+				    		<td>java.util.List&lt;com.example.demo.book.BookInfo&gt;</td>
+				    		<td>返回的记录集</td>
+				    	</tr>
+				    								    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">bookId</td>
+						    		<td>java.lang.Long</td>
+						    		<td>主键</td>
+						    	</tr>
+						    						    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">bookName</td>
+						    		<td>java.lang.String</td>
+						    		<td>书名</td>
+						    	</tr>
+						    						    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">publication</td>
+						    		<td>java.util.Date</td>
+						    		<td>出版日期</td>
+						    	</tr>
+						    						    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">isbn</td>
+						    		<td>java.lang.String</td>
+						    		<td>标准图书编号</td>
+						    	</tr>
+						    						    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">createTime</td>
+						    		<td>java.util.Date</td>
+						    		<td>创建时间</td>
+						    	</tr>
+						    						    	<tr>
+						    		<td>&nbsp;</td>
+						    		<td>&nbsp;</td>
+						    		<td colspan="2">price</td>
+						    		<td>java.lang.Integer</td>
+						    		<td>售价</td>
+						    	</tr>
+						    							    				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="3">total</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>总条数</td>
+				    	</tr>
+				    									    				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="3">offset</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>查询起始位置</td>
+				    	</tr>
+				    									    				    					    	<tr>
+				    		<td>&nbsp;</td>
+				    		<td colspan="3">limit</td>
+				    		<td>java.lang.Integer</td>
+				    		<td>返回条数</td>
+				    	</tr>
+				    									    				    				    </tbody></table>
+			  </div>
+			</div>
+		</div>
+		
+		
+		
+		<div class="tab-pane fade" id="debug">
+			<div class="panel panel-default">
+			  <div class="panel-heading">请求</div>
+			  <!--requestBody=true用textArea,false用from-->
+			  <div class="panel-body">
+			  <form id="fm">
+			    <table class="table table-bordered">
+			    			    				    	<tbody><tr>
+			    		<td width="10%">bookInfo.bookName</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="" validate="" name="bookInfo.bookName"></td>
+			    		<td width="40%">
+			    			<label class="control-label">书名</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">bookInfo.publication</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="date" validate="date" name="bookInfo.publication"></td>
+			    		<td width="40%">
+			    			<label class="control-label">出版日期</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">bookInfo.isbn</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="" validate="" name="bookInfo.isbn"></td>
+			    		<td width="40%">
+			    			<label class="control-label">标准图书编号</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">bookInfo.createTime</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="datetime" validate="datetime" name="bookInfo.createTime"></td>
+			    		<td width="40%">
+			    			<label class="control-label">创建时间</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">minPrice</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="number" validate="number" name="minPrice"></td>
+			    		<td width="40%">
+			    			<label class="control-label">最低价格</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">maxPrice</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="number" validate="number" name="maxPrice"></td>
+			    		<td width="40%">
+			    			<label class="control-label">最高价</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">offset</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="required,number" validate="notNull,number" name="offset"></td>
+			    		<td width="40%">
+			    			<label class="control-label">offset</label>
+			    		</td>
+			    	</tr>
+			    				    	<tr>
+			    		<td width="10%">limit</td>
+			    		<td width="50%"><input type="text" class="form-control" placeholder="required,number" validate="notNull,number" name="limit"></td>
+			    		<td width="40%">
+			    			<label class="control-label">limit</label>
+			    		</td>
+			    	</tr>
+			    				    </tbody></table>
+			    			    			    <button type="button" class="btn btn-primary" onclick="subForm()">提交</button>
+			  </form></div>
+			  
+			</div>
+			
+			<div class="panel panel-default">
+			  <div class="panel-heading">返回</div>
+			  <div class="panel-body">
+			   	<pre id="result">{
+  <span class="key">"result":</span> [
+    {
+      <span class="key">"bookId":</span> <span class="number">0</span>,
+      <span class="key">"bookName":</span> <span class="string">"test0"</span>,
+      <span class="key">"publication":</span> <span class="null">null</span>,
+      <span class="key">"isbn":</span> <span class="null">null</span>,
+      <span class="key">"createTime":</span> <span class="string">"2018-08-02 18:55:00"</span>,
+      <span class="key">"price":</span> <span class="null">null</span>
+    },
+    {
+      <span class="key">"bookId":</span> <span class="number">1</span>,
+      <span class="key">"bookName":</span> <span class="string">"test1"</span>,
+      <span class="key">"publication":</span> <span class="null">null</span>,
+      <span class="key">"isbn":</span> <span class="null">null</span>,
+      <span class="key">"createTime":</span> <span class="string">"2018-08-02 18:55:00"</span>,
+      <span class="key">"price":</span> <span class="null">null</span>
+    }
+  ],
+  <span class="key">"total":</span> <span class="number">1000</span>,
+  <span class="key">"offset":</span> <span class="number">1</span>,
+  <span class="key">"limit":</span> <span class="number">2</span>
+}</pre>
+			  </div>
+			</div>
+		</div>
+	</div>
+
+</div>
+</div>
+
+<script type="text/javascript">
+function subForm(){
+	var url='/book/select';
+	var requestJson='false';
+	var contentType='application/json;charset=UTF-8';
+	
+	if(requestJson=="true"){
+		$('#result').html('');
+		data=$("#requestContent").val();
+		ajaxUtil.postJson(url,data,function(resp){
+			$('#result').html(common.jsonToStr(resp))
+		});
+		return;
+	}
+	
+	if(!validate.valiForm($("#fm")[0])){
+		return;
+	}
+	$('#result').html('');
+	if(contentType.indexOf('json')!=-1){
+		common.postForm('fm',url,function(resp){
+			$('#result').html(common.jsonToStr(resp))
+		});
+	}else{
+		var data=$("#"+'fm').serialize();
+		url=url+'?'+data;
+		common.getHtml(url,function(resp){
+			$('#result').text(resp)
+		});
+	}
+}
+</script>
+
+
+
+</div>
+      </div>
+    </div>
+
+<script type="text/javascript">
+var ctx="";
+var devModel=true;
+</script>
+<script src="./main_files/jquery.min.js"></script>
+<script src="./main_files/bootstrap.min.js"></script>
+<script src="./main_files/bootstrap-table.min.js"></script>
+<script src="./main_files/bootstrap-table-zh-CN.min.js"></script>
+<script src="./main_files/common.js"></script>
+<script src="./main_files/ajaxUtil.js"></script>
+<script src="./main_files/dialog.js"></script>
+<script src="./main_files/tableUtil.js"></script>
+<script src="./main_files/validate.js"></script>
+<script src="./main_files/bootstrap-treeview.min.js"></script>
+  
+
+<script>
+
+function logout(){
+	self.location.href="/logout"
+}
+
+function show(el,url){
+	$(".active").removeClass("active");
+	$(el).parent().addClass("active");
+	ajaxUtil.html(url,function(html){
+		$("#main").html(html);
+	});
+}
+
+ajaxUtil.json('/treeView','',function(ret){
+	$('#tree').treeview({
+		data:ret,
+		onNodeSelected:function(event, data) {
+			if(data.id){
+				var url='/detail/'+data.id;
+				ajaxUtil.html(url,function(html){
+					$("#main").html(html);
+				});
+			}
+		}
+	});
+})
+
+   
+
+</script>
+<div class="_bd_ext_tip" style="visibility: hidden;"><span class="_bd_ext_search">百度一下</span><span class="_bd_ext_open">打开链接</span><span class="_bd_ext_copy">复制</span></div><div id="popalertDialog" class="modal" tabindex="-1" style="display: none;">	<div class="modal-dialog modal-sm" style="padding-top: 200px">	<div class="modal-content">		<div class="modal-header">			<button type="button" class="close" data-dismiss="modal">×</button>			<h4 class="blue bigger" id="titlealertDialog">offset不能为空</h4>		</div>			<div class="modal-footer">				<button class="btn btn-sm btn-primary" id="cancelBtnalertDialog">					<i class="ace-icon fa fa-times"></i> 确定				</button>			</div>		  </div>         </div>	 </div><div id="poploadingDialog" class="modal" tabindex="-1" style="display: none;">	<div class="modal-dialog modal-sm" style="padding-top: 200px">	<div class="modal-content">		<div class="modal-header">			<button type="button" class="close" data-dismiss="modal">×</button>			<h4 class="blue bigger" id="titleloadingDialog">处理中,请稍后...</h4>		</div><div class="modal-body" id="contentloadingDialog"><center><img src="./main_files/loading.gif"></center></div>			<div class="modal-footer">				<button class="btn btn-sm btn-primary" id="cancelBtnloadingDialog">					<i class="ace-icon fa fa-times"></i> 确定				</button>			</div>		  </div>         </div>	 </div></body></html>

@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="事务是保证业务逻辑正确最基本的前提，同时也常常是系统性能的最大的瓶颈，如果用好事务，在保证一致性的前提下，进一步缩短事务时间，一直是一个考验系统设计的重大难题">
+<meta name="keywords" content="高并发,事务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式事务">
+<meta property="og:url" content="http://yoursite.com/design/design/事务/index.html">
+<meta property="og:site_name" content="我的云笔记">
+<meta property="og:description" content="事务是保证业务逻辑正确最基本的前提，同时也常常是系统性能的最大的瓶颈，如果用好事务，在保证一致性的前提下，进一步缩短事务时间，一直是一个考验系统设计的重大难题">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/blog/images/af5b9c1e-4517-3df2-ad62-af25d1672d12.jpg">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534327410021.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532048863327.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532052540832.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532053118840.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532053636007.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532054180927.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534327368197.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534327377437.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534327391313.png">
+<meta property="og:updated_time" content="2018-08-15T10:04:35.213Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式事务">
+<meta name="twitter:description" content="事务是保证业务逻辑正确最基本的前提，同时也常常是系统性能的最大的瓶颈，如果用好事务，在保证一致性的前提下，进一步缩短事务时间，一直是一个考验系统设计的重大难题">
+<meta name="twitter:image" content="http://yoursite.com/blog/images/af5b9c1e-4517-3df2-ad62-af25d1672d12.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/design/design/事务/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>分布式事务 | 我的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5102824f4157d2cbdb282a1a889d910e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/design/design/事务/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式事务
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-29 15:42:45" itemprop="dateCreated datePublished" datetime="2018-07-29T15:42:45+08:00">2018-07-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-08-15 18:04:35" itemprop="dateModified" datetime="2018-08-15T18:04:35+08:00">2018-08-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/design/" itemprop="url" rel="index"><span itemprop="name">design</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/design/design/事务/" class="leancloud_visitors" data-flag-title="分布式事务">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>事务是保证业务逻辑正确最基本的前提，同时也常常是系统性能的最大的瓶颈，如果用好事务，在保证一致性的前提下，进一步缩短事务时间，一直是一个考验系统设计的重大难题</p>
+<a id="more"></a>
+<h1 id="数据库事务"><a href="#数据库事务" class="headerlink" title="数据库事务"></a>数据库事务</h1><h2 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h2><ul>
+<li><strong>Atomic原子性</strong>: 一个事务的所有系列操作步骤被看成是一个动作，所有的步骤要么全部完成要么一个也不会完成，如果事务过程中任何一点失败，将要被改变的数据库记录就不会被真正被改变。</li>
+<li><strong>Consistent一致性</strong>:事务在完成时，必须使所有的数据都保持一致状态。在相关数据库中，所有规则都必须应用于事务的修改，以保持所有数据的完整性。事务结束时，所有的内部数据结构（如 B 树索引或双向链表）都必须是正确的。某些维护一致性的责任由应用程序开发人员承担，他们必须确保应用程序已强制所有已知的完整性约束。例如，当开发用于转帐的应用程序时，应避免在转帐过程中任意移动小数点。   </li>
+<li><strong>Isolated</strong>隔离性: 主要用于实现并发控制, 隔离能够确保并发执行的事务能够顺序一个接一个执行，通过隔离，一个未完成事务不会影响另外一个未完成事务。</li>
+<li><strong>Durable</strong>持久性: 一旦一个事务被提交，它应该持久保存，不会因为和其他操作冲突而取消这个事务。通常是将数据保存在磁盘上。</li>
+</ul>
+<h2 id="数据隔离级别"><a href="#数据隔离级别" class="headerlink" title="数据隔离级别"></a>数据隔离级别</h2><ul>
+<li><strong>Read Uncommitted（读取未提交内容）</strong></li>
+</ul>
+<p>​       在该隔离级别，所有事务都可以看到其他未提交事务的执行结果。本隔离级别很少用于实际应用，因为它的性能也不比其他级别好多少。读取未提交的数据，也被称之为脏读（Dirty Read）。</p>
+<ul>
+<li><strong>Read Committed（读取提交内容）</strong></li>
+</ul>
+<p>​       这是大多数数据库系统的默认隔离级别（但不是MySQL默认的）。它满足了隔离的简单定义：一个事务只能看见已经提交事务所做的改变。这种隔离级别 也支持所谓的不可重复读（Nonrepeatable Read），因为同一事务的其他实例在该实例处理其间可能会有新的commit，所以同一select可能返回不同结果。</p>
+<ul>
+<li><strong>Repeatable Read（可重读）</strong></li>
+</ul>
+<p>​       这是MySQL的默认事务隔离级别，它确保同一事务的多个实例在并发读取数据时，会看到同样的数据行。不过理论上，这会导致另一个棘手的问题：幻读 （Phantom Read）。简单的说，幻读指当用户读取某一范围的数据行时，另一个事务又在该范围内插入了新行，当用户再读取该范围的数据行时，会发现有新的“幻影” 行。InnoDB和Falcon存储引擎通过多版本并发控制（MVCC，Multiversion Concurrency Control）机制解决了该问题。</p>
+<ul>
+<li><strong>Serializable（可串行化）</strong> </li>
+</ul>
+<p>​       这是最高的隔离级别，它通过强制事务排序，使之不可能相互冲突，从而解决幻读问题。简言之，它是在每个读的数据行上加上共享锁。在这个级别，可能导致大量的超时现象和锁竞争。</p>
+<p>​         这四种隔离级别采取不同的锁类型来实现，若读取的是同一个数据的话，就容易发生问题。例如：</p>
+<p>​         脏读(Drity Read)：某个事务已更新一份数据，另一个事务在此时读取了同一份数据，由于某些原因，前一个RollBack了操作，则后一个事务所读取的数据就会是不正确的。</p>
+<p>​         不可重复读(Non-repeatable read):在一个事务的两次查询之中数据不一致，这可能是两次查询过程中间插入了一个事务更新的原有的数据。</p>
+<p>​         幻读(Phantom Read):在一个事务的两次查询中数据笔数不一致，例如有一个事务查询了几列(Row)数据，而另一个事务却在此时插入了新的几列数据，先前的事务在接下来的查询中，就会发现有几列数据是它先前所没有的。</p>
+<p><img src="/blog/images/af5b9c1e-4517-3df2-ad62-af25d1672d12.jpg" alt=""></p>
+<h2 id="MVCC"><a href="#MVCC" class="headerlink" title="MVCC"></a>MVCC</h2><p>Multi-Version Concurrency Contro：多版本并发控制</p>
+<p>mysql的存储引擎InnoDB 通过MVCC实现事务</p>
+<p>具体实现为</p>
+<ol>
+<li>每开启一个事务都对应一个版本号</li>
+<li>每行记录后面保存两个隐藏列，数据创建时的版本号，删除时的版本号</li>
+<li>innoDB只会查找版本早于当前事务版本的数据行</li>
+<li>行的删除版本要么未定，要么大于当前事务版本号，就认为数据没被删除</li>
+<li>更新就是新插入一条记录</li>
+</ol>
+<h2 id="幻读产生原因"><a href="#幻读产生原因" class="headerlink" title="幻读产生原因"></a>幻读产生原因</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">begin</span>;</span><br><span class="line"><span class="keyword">select</span> bookId,bookName <span class="keyword">from</span> m_book <span class="keyword">where</span> bookId=<span class="number">1</span></span><br><span class="line"><span class="keyword">update</span> m_book <span class="keyword">set</span> bookName=<span class="number">2</span> <span class="keyword">where</span> bookname=<span class="number">1</span></span><br><span class="line"><span class="keyword">commit</span>;</span><br></pre></td></tr></table></figure>
+<p>只要开启了事务，mysql就保证每次 查询出来的数据是一样的。如果在这个事务执行期间，其它事务修改了或插入了一些数据，在这个事务中是查不到的。</p>
+<p>上述语句查询出来bookId=1的数据bookName=1也是1</p>
+<p>当执行update的时候，如果只写bookname=1，这时候会更新到什么数据是不确定的，因为update跟新的是实际数据，而不是这个查询出来的某个版本的数据</p>
+<h1 id="转账示例"><a href="#转账示例" class="headerlink" title="转账示例"></a>转账示例</h1><p>张三有100块，李四也有100块，张三给李四转50块，转账分2步</p>
+<ol>
+<li>张三账户减少50</li>
+<li>李四账户增加50</li>
+</ol>
+<p>转账这个过程就是一个事物</p>
+<ul>
+<li>原子性：账户只存在2种情况：转账陈功张三50，李四150。转账失败，两人各自持有100块。不存在任其他情况.</li>
+<li>一致性：账户总额是200，无论事物成功与否，最终总额必须还是200</li>
+<li>隔离性：转账的中间过程对外是不可见的，其它事物只能看到结果，不能看到中间过程</li>
+<li>持久性：转账过程一旦完成，账户数据就被持久保存，要修改必须另起事务。</li>
+</ul>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ol>
+<li>数据库：mysql</li>
+<li>语言：java</li>
+<li>框架：springboot，mybatis</li>
+</ol>
+<p>流程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">入口-&gt;service:账户信息和金额</span><br><span class="line">service-&gt;dao:减少张三余额</span><br><span class="line">dao--&gt;service:影响记录条数</span><br><span class="line">service--&gt;dao:增加李四账户余额</span><br><span class="line">dao-&gt;service:影响记录条数</span><br><span class="line">service--&gt;入口:转账成功</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/1534327410021.png" alt="1534327410021"></p>
+<h2 id="初始化数据"><a href="#初始化数据" class="headerlink" title="初始化数据"></a>初始化数据</h2><p><img src="/blog/images/1532048863327.png" alt="1532048863327"></p>
+<h3 id="sql"><a href="#sql" class="headerlink" title="sql"></a>sql</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> <span class="keyword">if</span> <span class="keyword">exists</span> m_account;</span><br><span class="line">#建表</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> m_account</span><br><span class="line">(</span><br><span class="line">   accountId            <span class="built_in">bigint</span> <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'主键'</span>,</span><br><span class="line">   accountName          <span class="built_in">varchar</span>(<span class="number">16</span>) <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'账户名，唯一非空'</span>,</span><br><span class="line">   balance              <span class="built_in">int</span> <span class="keyword">unsigned</span> <span class="keyword">comment</span> <span class="string">'账户余额，必须大于0'</span>,</span><br><span class="line">   primary <span class="keyword">key</span> (accountId)</span><br><span class="line">);</span><br><span class="line">#增加唯一约束</span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> m_account  <span class="keyword">add</span> <span class="keyword">unique</span> <span class="keyword">key</span>(accountName);</span><br><span class="line">#初始化数据</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="string">`m_account`</span>(<span class="string">`accountId`</span>,<span class="string">`accountName`</span>,<span class="string">`balance`</span>)<span class="keyword">values</span>(<span class="number">1</span>,<span class="string">'zhangsan'</span>,<span class="number">100</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="string">`m_account`</span>(<span class="string">`accountId`</span>,<span class="string">`accountName`</span>,<span class="string">`balance`</span>)<span class="keyword">values</span>(<span class="number">2</span>,<span class="string">'lisi'</span>,<span class="number">100</span>);</span><br><span class="line">#查看结果</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> m_account</span><br></pre></td></tr></table></figure>
+<h2 id="基础代码"><a href="#基础代码" class="headerlink" title="基础代码"></a>基础代码</h2><h3 id="model"><a href="#model" class="headerlink" title="model"></a>model</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Account</span>  </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Long accountId;</span><br><span class="line">	<span class="keyword">private</span> Integer balance;</span><br><span class="line">	<span class="keyword">private</span> String accountName;</span><br><span class="line">    <span class="comment">//省略get和set</span></span><br></pre></td></tr></table></figure>
+<h3 id="dao"><a href="#dao" class="headerlink" title="dao"></a>dao</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AccountDao</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 *  修改账户余额</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@param</span> params.accountName 账户名</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@param</span> params.balance 要变动金额，如果为正就增加，为负就减少</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@return</span> 影响的条数</span></span><br><span class="line"><span class="comment">	 * */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Integer <span class="title">updateBalanceByName</span><span class="params">(Map&lt;String,Object&gt; params)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="mapper-xml"><a href="#mapper-xml" class="headerlink" title="mapper.xml"></a>mapper.xml</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">"top.luckie.demo.dao.AccountDao"</span> &gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">"updateBalanceByName"</span> <span class="attr">parameterType</span>=<span class="string">"java.util.Map"</span>&gt;</span></span><br><span class="line">  	update m_account set balance=balance+#&#123;amount&#125; where accountName=#&#123;accountName&#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="无事务的情况"><a href="#无事务的情况" class="headerlink" title="无事务的情况"></a>无事务的情况</h1><p>为了模拟出错的情况，先增加李四账户后减少张三账户</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	AccountDao accountDao;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 转账</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> from 减少金额账户名</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> to 增加金额账户名</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> amount 要转金额</span></span><br><span class="line"><span class="comment">	 * */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(String from,String to,Integer amount)</span> </span>&#123;</span><br><span class="line">		<span class="comment">//给李四账户加钱</span></span><br><span class="line">		Map&lt;String,Object&gt; map=<span class="keyword">new</span> HashMap();</span><br><span class="line">		map.put(<span class="string">"accountName"</span>, to);</span><br><span class="line">		map.put(<span class="string">"amount"</span>, amount);</span><br><span class="line">		accountDao.updateBalanceByName(map);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//给账户账户减钱</span></span><br><span class="line">		map=<span class="keyword">new</span> HashMap();</span><br><span class="line">		map.put(<span class="string">"accountName"</span>, from);</span><br><span class="line">		map.put(<span class="string">"amount"</span>, <span class="number">0</span>-amount);</span><br><span class="line">		accountDao.updateBalanceByName(map);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最初两个人账户上都有100</p>
+<p><img src="/blog/images/1532052540832.png" alt="1532052540832"></p>
+<h2 id="第一次"><a href="#第一次" class="headerlink" title="第一次"></a>第一次</h2><p>张三向李四转50</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accountService.transfer(<span class="string">"zhangsan"</span>, <span class="string">"lisi"</span>, <span class="number">50</span>);</span><br></pre></td></tr></table></figure>
+<p>log</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DEBUG updateBalanceByName.debug:159 - ==&gt;  Preparing: update m_account set balance=balance+? where accountName=? </span><br><span class="line">DEBUG updateBalanceByName.debug:159 - ==&gt; Parameters: 50(Integer), lisi(String)</span><br><span class="line">DEBUG updateBalanceByName.debug:159 - &lt;==    Updates: 1</span><br><span class="line">DEBUG updateBalanceByName.debug:159 - ==&gt;  Preparing: update m_account set balance=balance+? where accountName=? </span><br><span class="line">DEBUG updateBalanceByName.debug:159 - ==&gt; Parameters: -50(Integer), zhangsan(String)</span><br><span class="line">DEBUG updateBalanceByName.debug:159 - &lt;==    Updates: 1</span><br></pre></td></tr></table></figure>
+<p>数据更新为</p>
+<p><img src="/blog/images/1532053118840.png" alt="1532053118840"></p>
+<h2 id="第二次"><a href="#第二次" class="headerlink" title="第二次"></a>第二次</h2><p>恢复数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> m_account <span class="keyword">set</span> balance=<span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+<p>张三向李四转110</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accountService.transfer(<span class="string">"zhangsan"</span>, <span class="string">"lisi"</span>, <span class="number">110</span>);</span><br></pre></td></tr></table></figure>
+<p>日志报错</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">### Error updating database.  Cause: com<span class="variable">.mysql</span><span class="variable">.jdbc</span><span class="variable">.MysqlDataTruncation</span>: Data truncation: BIGINT UNSIGNED value is out of range in '(<span class="meta">`demo`.`m_account`.`balance` + -(110))'</span></span><br></pre></td></tr></table></figure>
+<p>由于账户余额不能小于0，所以程序出错了</p>
+<p>查看数据库</p>
+<p><img src="/blog/images/1532053636007.png" alt="1532053636007"></p>
+<p>李四金额增加了，但张三的账户余额没少，这个逻辑不对</p>
+<h1 id="数据库事务-1"><a href="#数据库事务-1" class="headerlink" title="数据库事务"></a>数据库事务</h1><p>在service方法上加上@Transactional</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(String from,String to,Integer amount)</span> </span>&#123;</span><br><span class="line">    。。。。</span><br></pre></td></tr></table></figure>
+<p>再执行转账操作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accountService.transfer(<span class="string">"zhangsan"</span>, <span class="string">"lisi"</span>, <span class="number">110</span>);</span><br></pre></td></tr></table></figure>
+<p>查看日志发现报一样的错，但数据库李四的余额还是100，说明事务回滚了</p>
+<p><img src="/blog/images/1532054180927.png" alt="1532054180927"></p>
+<p>spring是用AOP实现事务的，所以入口不能是当前的service，如果这样写事务是不生效的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(String from,String to,Integer amount)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer2</span><span class="params">(String from,String to,Integer amount)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.transfer(from, to, amount);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>入口代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accountService.transfer2(<span class="string">"zhangsan"</span>, <span class="string">"lisi"</span>, <span class="number">110</span>);</span><br></pre></td></tr></table></figure>
+<p>变通方法，自己注入自己</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">@Service</span><br><span class="line">public <span class="class"><span class="keyword">class</span> <span class="title">AccountService</span> </span>&#123;</span><br><span class="line">	@Autowired </span><br><span class="line">	AccountService self;</span><br><span class="line"></span><br><span class="line">	@Transactional</span><br><span class="line">	public <span class="keyword">void</span> transfer(<span class="built_in">String</span> <span class="keyword">from</span>,<span class="built_in">String</span> to,Integer amount) &#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	public <span class="keyword">void</span> transfer2(<span class="built_in">String</span> <span class="keyword">from</span>,<span class="built_in">String</span> to,Integer amount) &#123;</span><br><span class="line">		self.transfer(<span class="keyword">from</span>, to, amount);</span><br><span class="line">	&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h1 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h1><h2 id="CAP定理"><a href="#CAP定理" class="headerlink" title="CAP定理"></a>CAP定理</h2><p>cap是分布式系统中进行平衡的理论，它是由 Eric Brewer发布在2000年。</p>
+<ul>
+<li><strong>Consistent一致性</strong>: 同样数据在分布式系统中所有地方都是相同的。</li>
+<li><strong>Available可用性</strong>: 所有在分布式系统活跃的节点都能够处理操作且能响应查询。</li>
+<li><strong>Partition Tolerant</strong>分区容错性: 即使出现单个组件无法可用,操作依然可以完成 </li>
+</ul>
+<p>　　一般情况下CAP理论认为你不能同时拥有上述三种，只能同时选择两种，这是一个实践总结，当有网络分区情况下，也就是分布式系统中，你不能又要有完美一致性和100%的可用性，只能这在两者选择一个。</p>
+<h2 id="BASE理论"><a href="#BASE理论" class="headerlink" title="BASE理论"></a>BASE理论</h2><p>在分布式系统中，我们往往追求的是可用性，它的重要程序比一致性要高，那么如何实现高可用性呢？ 前人已经给我们提出来了另外一个理论，就是BASE理论，它是用来对CAP定理进行进一步扩充的。BASE理论指的是：</p>
+<ul>
+<li>Basically Available（基本可用）</li>
+<li>Soft state（软状态）</li>
+<li>Eventually consistent（最终一致性）</li>
+</ul>
+<p>BASE理论是对CAP中的一致性和可用性进行一个权衡的结果，理论的核心思想就是：<strong>我们无法做到强一致，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性</strong>（Eventual consistency）。</p>
+<h2 id="TCC"><a href="#TCC" class="headerlink" title="TCC"></a>TCC</h2><p>TCC 其实就是采用的补偿机制，其核心思想是：针对每个操作，都要注册一个与其对应的确认和补偿（撤销）操作。它分为三个阶段：</p>
+<ul>
+<li>Try 阶段主要是对业务系统做检测及资源预留</li>
+<li>Confirm 阶段主要是对业务系统做确认提交，Try阶段执行成功并开始执行 Confirm阶段时，默认 Confirm阶段是不会出错的。即：只要Try成功，Confirm一定成功。</li>
+<li>Cancel 阶段主要是在业务执行错误，需要回滚的状态下执行的业务取消，预留资源释放。</li>
+</ul>
+<h1 id="购买示例"><a href="#购买示例" class="headerlink" title="购买示例"></a>购买示例</h1><h2 id="悲观锁"><a href="#悲观锁" class="headerlink" title="悲观锁"></a>悲观锁</h2><p>基本动作</p>
+<ol>
+<li>减少用户余额</li>
+<li>库存库存数量</li>
+</ol>
+<p>为了实现TCC，需要多做以下动作</p>
+<ol>
+<li>创建/取消订单</li>
+<li>锁定/释放库存</li>
+<li>保存扣款记录并和订单关联</li>
+<li>保存库存变化记录并和订单关联</li>
+</ol>
+<h3 id="订单状态变化"><a href="#订单状态变化" class="headerlink" title="订单状态变化"></a>订单状态变化</h3><div id="flowchart-0" class="flow-chart"></div>
+
+<p>​                                                                    </p>
+<h3 id="正常流程"><a href="#正常流程" class="headerlink" title="正常流程"></a>正常流程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">用户-&gt;用户系统:购买</span><br><span class="line">用户系统-&gt;订单系统:下单请求</span><br><span class="line">订单系统-&gt;订单系统:创建订单记录</span><br><span class="line">订单系统-&gt;库存系统:锁库存请求</span><br><span class="line">库存系统-&gt;库存系统:锁定库存</span><br><span class="line">库存系统-&gt;订单系统:锁定成功</span><br><span class="line">订单系统-&gt;订单系统:状态改为库存锁定</span><br><span class="line">订单系统-&gt;用户系统:下单成功</span><br><span class="line">用户系统-&gt;用户系统:扣款</span><br><span class="line">用户系统--&gt;订单系统:扣款成功</span><br><span class="line">用户系统-&gt;用户:购买成功</span><br><span class="line">订单系统--&gt;订单系统:状态改为已扣款</span><br><span class="line">订单系统-&gt;库存系统:减库存</span><br><span class="line">库存系统-&gt;订单系统:减库存成功</span><br><span class="line">订单系统--&gt;订单系统:状态改为已减库存</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/1534327368197.png" alt="1534327368197"></p>
+<h3 id="锁定失败"><a href="#锁定失败" class="headerlink" title="锁定失败"></a>锁定失败</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">用户-&gt;用户系统:购买</span><br><span class="line">用户系统-&gt;订单系统:下单请求</span><br><span class="line">订单系统-&gt;订单系统:创建订单记录</span><br><span class="line">订单系统-&gt;库存系统:锁库存请求</span><br><span class="line">库存系统-&gt;库存系统:锁定库存</span><br><span class="line">库存系统-&gt;订单系统:锁定失败</span><br><span class="line">订单系统-&gt;订单系统:状态改为取消</span><br><span class="line">订单系统-&gt;用户系统:下单失败</span><br><span class="line">用户系统-&gt;用户:库存不足</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/1534327377437.png" alt="1534327377437"></p>
+<h3 id="扣款失败"><a href="#扣款失败" class="headerlink" title="扣款失败"></a>扣款失败</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">用户-&gt;用户系统:购买</span><br><span class="line">用户系统-&gt;订单系统:下单请求</span><br><span class="line">订单系统-&gt;订单系统:创建订单记录</span><br><span class="line">订单系统-&gt;库存系统:锁库存请求</span><br><span class="line">库存系统-&gt;库存系统:锁定库存</span><br><span class="line">库存系统-&gt;订单系统:锁定成功</span><br><span class="line">订单系统-&gt;订单系统:状态改为库存锁定</span><br><span class="line">订单系统-&gt;用户系统:下单成功</span><br><span class="line">用户系统-&gt;用户系统:扣款</span><br><span class="line">用户系统--&gt;订单系统:恢复库存</span><br><span class="line">用户系统-&gt;用户:余额不足</span><br><span class="line">订单系统--&gt;库存系统:恢复库存</span><br><span class="line">订单系统--&gt;订单系统:状态改为已恢复库</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/1534327391313.png" alt="1534327391313"></p>
+<h3 id="系统对应操作"><a href="#系统对应操作" class="headerlink" title="系统对应操作"></a>系统对应操作</h3><p>用户系统</p>
+<ul>
+<li>减少用户余额</li>
+<li>记录扣款记录</li>
+</ul>
+<p>库存系统</p>
+<ul>
+<li>锁定库存</li>
+<li>恢复库存</li>
+<li>减少库存</li>
+<li>记录库存变化</li>
+</ul>
+<p>订单系统</p>
+<ul>
+<li>创建订单</li>
+<li>取消订单</li>
+<li>修改订单状态</li>
+</ul>
+<h3 id="不一致产生原因"><a href="#不一致产生原因" class="headerlink" title="不一致产生原因"></a>不一致产生原因</h3><p> 用户系统，订单系统，库存系统是相互独立的，由于网络原因，购买流程里凡是涉及到系统间交互的动作都有可能造成数据的不一致，所有不一致造成的结果就是订单状态一直处于未完成状态。</p>
+<p>​    如上所述订单所有可能处于的状态有：创建，锁定，已扣款，成功（已减库存），失败（锁定失败），取消（库存恢复）。其中成功，失败和取消是完成的状态，其它情况代表未完成。</p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>如果订单长时间处于中间状态，表示系统出现了通讯异常，需要额外的程序介入，保证数据的最终一致性，下面对所有不一致的情况逐一分析</p>
+<ol>
+<li>长期处于创建</li>
+</ol>
+<p>原因：发送锁定库存请求超时</p>
+<p>解决方案：查询库存系统，看对应订单是否有锁定记录，如果有就恢复库存，如果没有就将状态改为失败。  </p>
+<ol start="2">
+<li>长期处于锁定</li>
+</ol>
+<p>原因：下单操作超时，或者未能成功发送扣款结果</p>
+<p>解决方案：查询扣款记录，如果有扣款记录就减少库存，没有就恢复库存，并修改状态</p>
+<ol start="3">
+<li>长期处于已扣款</li>
+</ol>
+<p>原因：库存系统未成功接收到减库存指令</p>
+<p>解决方案：查询是否有减库存记录，如果有直接改状态，如果没有减库存后修改状态</p>
+<h1 id="本地消息表方法"><a href="#本地消息表方法" class="headerlink" title="本地消息表方法"></a>本地消息表方法</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">用户-&gt;库存系统:购买</span><br><span class="line">库存系统-&gt;库存系统:创建订单并扣除库存</span><br><span class="line">库存系统--&gt;消息中间件:异步发送购买消息</span><br><span class="line">库存系统-&gt;用户:提示用户下单成功</span><br><span class="line">消息中间件--&gt;用户系统:传递消息</span><br><span class="line">用户系统-&gt;用户系统:减少余额</span><br><span class="line">用户系统--&gt;库存系统:修改订单状态为完成</span><br></pre></td></tr></table></figure>
+<p>为了进一步提高系统可用性，可以将那些在业务逻辑上可以回退的操作放在前面，然后通过消息队列的方式将消息发送到需要后续操作的系统上，给用户的响应时间就能进一步缩短了。<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">st=>start: 创建
+op=>operation: 已扣款
+op3=>end: 已减库存
+op2=>end: 恢复库存
+cond=>condition: 锁库存
+io=>operation: 库存锁定
+cond1=>condition: 扣款
+e=>end: 取消
+st->cond
+cond(yes)->io(bottom)->cond1
+cond(no)->e
+cond1(yes)->op->op3
+cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/高并发/" rel="tag"># 高并发</a>
+          
+            <a href="/blog/tags/事务/" rel="tag"># 事务</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/code/spring/springMVC/develop/springMVC/" rel="next" title="springMVC组件说明">
+                <i class="fa fa-chevron-left"></i> springMVC组件说明
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/design/design/seckill/" rel="prev" title="秒杀场景系统设计">
+                秒杀场景系统设计 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives">
+                
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据库事务"><span class="nav-number">1.</span> <span class="nav-text">数据库事务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ACID"><span class="nav-number">1.1.</span> <span class="nav-text">ACID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据隔离级别"><span class="nav-number">1.2.</span> <span class="nav-text">数据隔离级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC"><span class="nav-number">1.3.</span> <span class="nav-text">MVCC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#幻读产生原因"><span class="nav-number">1.4.</span> <span class="nav-text">幻读产生原因</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#转账示例"><span class="nav-number">2.</span> <span class="nav-text">转账示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#环境"><span class="nav-number">2.1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化数据"><span class="nav-number">2.2.</span> <span class="nav-text">初始化数据</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sql"><span class="nav-number">2.2.1.</span> <span class="nav-text">sql</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基础代码"><span class="nav-number">2.3.</span> <span class="nav-text">基础代码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#model"><span class="nav-number">2.3.1.</span> <span class="nav-text">model</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dao"><span class="nav-number">2.3.2.</span> <span class="nav-text">dao</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mapper-xml"><span class="nav-number">2.3.3.</span> <span class="nav-text">mapper.xml</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#无事务的情况"><span class="nav-number">3.</span> <span class="nav-text">无事务的情况</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#第一次"><span class="nav-number">3.1.</span> <span class="nav-text">第一次</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二次"><span class="nav-number">3.2.</span> <span class="nav-text">第二次</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据库事务-1"><span class="nav-number">4.</span> <span class="nav-text">数据库事务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分布式事务"><span class="nav-number">5.</span> <span class="nav-text">分布式事务</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP定理"><span class="nav-number">5.1.</span> <span class="nav-text">CAP定理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BASE理论"><span class="nav-number">5.2.</span> <span class="nav-text">BASE理论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCC"><span class="nav-number">5.3.</span> <span class="nav-text">TCC</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#购买示例"><span class="nav-number">6.</span> <span class="nav-text">购买示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#悲观锁"><span class="nav-number">6.1.</span> <span class="nav-text">悲观锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#订单状态变化"><span class="nav-number">6.1.1.</span> <span class="nav-text">订单状态变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#正常流程"><span class="nav-number">6.1.2.</span> <span class="nav-text">正常流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁定失败"><span class="nav-number">6.1.3.</span> <span class="nav-text">锁定失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扣款失败"><span class="nav-number">6.1.4.</span> <span class="nav-text">扣款失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统对应操作"><span class="nav-number">6.1.5.</span> <span class="nav-text">系统对应操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不一致产生原因"><span class="nav-number">6.1.6.</span> <span class="nav-text">不一致产生原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方案"><span class="nav-number">6.1.7.</span> <span class="nav-text">解决方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#本地消息表方法"><span class="nav-number">7.</span> <span class="nav-text">本地消息表方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+<span id="busuanzi_container_site_uv">
+  &nbsp;<span id="busuanzi_value_site_uv"></span>
+</span>
+
+<span>/</span>
+
+<span id="busuanzi_container_site_pv">
+    <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CIBUz5A0KNFv8xbAPO8ncqk6-gzGzoHsz", "YtGifAKqwENTTs9hhQ1GxdAG");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            
+            counter.save(null, {
+              success: function(counter) {
+                
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            
+              var newcounter = new Counter();
+              /* Set ACL */
+              var acl = new AV.ACL();
+              acl.setPublicReadAccess(true);
+              acl.setPublicWriteAccess(true);
+              newcounter.setACL(acl);
+              /* End Set ACL */
+              newcounter.set("title", title);
+              newcounter.set("url", url);
+              newcounter.set("time", 1);
+              newcounter.save(null, {
+                success: function(newcounter) {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+                },
+                error: function(newcounter, error) {
+                  console.log('Failed to create');
+                }
+              });
+            
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

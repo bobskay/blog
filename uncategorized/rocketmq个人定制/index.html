@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="由于网络和性能因素，rocketmq对于重复消费，顺序消费，以及事务消息的解决方案，就是不解决。 客户端根据自身业务情况，需要在一致性和可用性之间做出取舍，自己给出方案">
+<meta name="keywords" content="rocketmq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rocketmq个人定制">
+<meta property="og:url" content="http://yoursite.com/uncategorized/rocketmq个人定制/index.html">
+<meta property="og:site_name" content="我的云笔记">
+<meta property="og:description" content="由于网络和性能因素，rocketmq对于重复消费，顺序消费，以及事务消息的解决方案，就是不解决。 客户端根据自身业务情况，需要在一致性和可用性之间做出取舍，自己给出方案">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534313592698.png">
+<meta property="og:updated_time" content="2018-08-15T09:43:50.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rocketmq个人定制">
+<meta name="twitter:description" content="由于网络和性能因素，rocketmq对于重复消费，顺序消费，以及事务消息的解决方案，就是不解决。 客户端根据自身业务情况，需要在一致性和可用性之间做出取舍，自己给出方案">
+<meta name="twitter:image" content="http://yoursite.com/blog/images/1534313592698.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/uncategorized/rocketmq个人定制/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>rocketmq个人定制 | 我的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5102824f4157d2cbdb282a1a889d910e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/uncategorized/rocketmq个人定制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">rocketmq个人定制
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-15 11:15:56 / 修改时间：17:43:50" itemprop="dateCreated datePublished" datetime="2018-08-15T11:15:56+08:00">2018-08-15</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/uncategorized/rocketmq个人定制/" class="leancloud_visitors" data-flag-title="rocketmq个人定制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>由于网络和性能因素，rocketmq对于重复消费，顺序消费，以及事务消息的解决方案，就是不解决。</p>
+<p>客户端根据自身业务情况，需要在一致性和可用性之间做出取舍，自己给出方案</p>
+<a id="more"></a>
+<p>我的方案是分别在发送方和消费方创建2张表：发送表和消费表，通过本地事务的方式解决。同时对于每个topic，新增一个结果确认的消息，发送方发送消息同时，需要消费这个结果确认的topic。大体流程</p>
+<ol>
+<li>发送方往发送表插入记录，并生成sendid</li>
+<li>发送方执行业务代码，如果成功就往MQ发送消息，如果失败则回滚事务</li>
+<li>消费方收到消息后，往消费表插入记录，由于sendId做了唯一约束，如果插入失败，表明已经消费过了</li>
+<li>插入成功后执行业务代码</li>
+<li>业务本身的成功和失败，直接更新消费表</li>
+<li>如果出现异常，回滚事务，相当于没消费</li>
+<li>消费成功往MQ发送结果</li>
+<li>发送方收到消费结果，更新发送表，本次消费结束</li>
+</ol>
+<h1 id="发送"><a href="#发送" class="headerlink" title="发送"></a>发送</h1><h2 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h2><div id="flowchart-0" class="flow-chart"></div>
+
+<h2 id="异常点"><a href="#异常点" class="headerlink" title="异常点"></a>异常点</h2><p>由于执行的是本地事务，所以只要消息表里有记录，就说明业务成功了，需要发送消。如果没记录，就说明不需要发。唯一异常原因是消息没发送到MQ，这个问题可以等到消息确认环节再解决。</p>
+<h1 id="接收"><a href="#接收" class="headerlink" title="接收"></a>接收</h1><h2 id="流程图-1"><a href="#流程图-1" class="headerlink" title="流程图"></a>流程图</h2><div id="flowchart-1" class="flow-chart"></div>
+
+<h2 id="异常点-1"><a href="#异常点-1" class="headerlink" title="异常点"></a>异常点</h2><p>业务自身结果，例如余额不足，库存不足等情况，属于业务状态，这种情况当做消费成功处理，只需要把结果通知到生产方就好了。只有出现了未知 错误的时候，消息表和业务一起回滚，等待消息重发。</p>
+<p>非业务的因素的异常，就是成功消费后，未成功向mq发送结果，这个情况和发送时的异常一样，可以等到确认环节处理</p>
+<h1 id="结果确认"><a href="#结果确认" class="headerlink" title="结果确认"></a>结果确认</h1><h2 id="流程图-2"><a href="#流程图-2" class="headerlink" title="流程图"></a>流程图</h2><div id="flowchart-2" class="flow-chart"></div>
+
+<h2 id="异常点-2"><a href="#异常点-2" class="headerlink" title="异常点"></a>异常点</h2><p>这个地方对于MQ来说不存在异常的的情况</p>
+<h1 id="补偿机制"><a href="#补偿机制" class="headerlink" title="补偿机制"></a>补偿机制</h1><p>综上所述，对于MQ来说，所有因网络因素造成的消息未成功到达的情况，最终汇总后的结果都是发送表里的数据长期没有消费记录</p>
+<p>所以要做的就是查询发送表里的超过一定时间，无消费结果的数据，向消费方发起查询。在主动查询的的情况下，只要不是服务器全部宕机，总能获取结果的，根据查询结果</p>
+<ul>
+<li>如果是消费方未收到消息，就重发</li>
+<li>如果消费方一直消费失败，发送预警，人工介入</li>
+<li>已经有结果，直接更新记录</li>
+</ul>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><h2 id="producer"><a href="#producer" class="headerlink" title="producer"></a>producer</h2><ul>
+<li>在业务入口添加SendMessage注解</li>
+<li>业务在需要发送某种消息的时候只需要调用msgService.send将数据插入消息表</li>
+<li>msgService.send除了往数据库插入数据外，还会将插入的记录放一份到当前线程</li>
+<li>被SendMessage注解的方法结束，系统会从当前线程取出在此期间插入的消息，自动往mq发送消息</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="meta">@SendMessage</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> OrderInfo <span class="title">insert</span><span class="params">(Long userId, Long bookId, Integer amount)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> orderId = newId();</span><br><span class="line"></span><br><span class="line">    OrderCreateMsg orderMsg = <span class="keyword">new</span> OrderCreateMsg();</span><br><span class="line">    orderMsg.setBookId(bookId);</span><br><span class="line">    orderMsg.setAmount(amount);</span><br><span class="line">    orderMsg.setOrderId(orderId);</span><br><span class="line">    Long orderSendId = msgService.send(orderMsg);<span class="comment">//插入订单创建消息</span></span><br><span class="line"></span><br><span class="line">    EmailMsg email = <span class="keyword">new</span> EmailMsg();</span><br><span class="line">    email.setContent(<span class="string">"购买图书:"</span> + bookId);</span><br><span class="line">    email.setBusId(orderId + <span class="string">""</span>);</span><br><span class="line">    email.setSubject(<span class="string">"准备购买图书"</span>);</span><br><span class="line">    email.setToAddress(<span class="string">"xxxxx@xxxx.com"</span>);</span><br><span class="line">    Long emailMsId = msgService.send(email);<span class="comment">//插入邮件消息</span></span><br><span class="line"></span><br><span class="line">    OrderInfo order = <span class="keyword">new</span> OrderInfo();</span><br><span class="line">    order.setBookMsId(orderSendId);</span><br><span class="line">    order.setEmailMsId(emailMsId);</span><br><span class="line">    order.setCreateTime(<span class="keyword">new</span> Date());</span><br><span class="line">    order.setOrderId(orderId);</span><br><span class="line">    order.setUserId(userId);</span><br><span class="line">    order.setBookId(bookId);</span><br><span class="line">    order.setAmount(amount);</span><br><span class="line">    orderDao.insert(order);</span><br><span class="line">    <span class="keyword">return</span> order;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>系统在创建一个topic的时候，会自动创建一个叫%RESULT%XXX的topic，这个功能在我自己写的rocketmq管理界面里实现了</p>
+<p><img src="/blog/images/1534313592698.png" alt="1534313529114"></p>
+<p>produer决定往某个topic发送消息的时候，会通过push的方式消费这个topic对应的%RESULT%topic。</p>
+<h2 id="consumer"><a href="#consumer" class="headerlink" title="consumer"></a>consumer</h2><p>消费者在监听到消息后，进入主业务方法</p>
+<ul>
+<li>在这个方法上标注ConsumerMessage</li>
+<li>业务方通过msgService.prepare判断消费是否重复消费</li>
+<li>消费结束后通过msgService.consumer更新消费结果</li>
+<li>系统在ConsumerMessage标记的方法结束后，会从当前线程取出消费过的消息，往MQ里发送消费结果</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ConsumerMessage</span></span><br><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendEmail</span><span class="params">(MessageExt msg)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    log.debug(<span class="string">"收到邮件消息:"</span> + jsonUtil.toString(msg));</span><br><span class="line">    EmailMsg email = msgService.prepare(msg, EmailMsg.class, <span class="keyword">true</span>);<span class="comment">//锁定</span></span><br><span class="line">    <span class="keyword">if</span> (email == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ConsumerResult result = ConsumerResult.UNKNOWN;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        result = doBussiness(email);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> (result) &#123;</span><br><span class="line">            <span class="keyword">case</span> SUCCESS:</span><br><span class="line">            <span class="keyword">case</span> ROLLBACK:</span><br><span class="line">                msgService.consumer(msg, email, result, <span class="keyword">true</span>);<span class="comment">//确认</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> UNKNOWN:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"回滚事务,当做未消费处理"</span>);</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h2><p>produer需启动一个定时任务，定期查询超过一定时间，还无消费结果记录。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> m_msgsend <span class="keyword">WHERE</span> createTime&lt;<span class="keyword">TIMESTAMPADD</span>(<span class="keyword">MINUTE</span>,<span class="number">-10</span>,<span class="keyword">NOW</span>()) <span class="keyword">AND</span> msgConsumerId <span class="keyword">IS</span> <span class="literal">NULL</span></span><br></pre></td></tr></table></figure>
+<p>consumer端启动的时候，会自动启动一个服务，用于监听那些来查询消费结果的请求，这个用rocketmq封装的org.apache.rocketmq.remoting.netty.NettyRemotingServer实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> NettyRemotingServer server;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">MsgConfirmServer</span><span class="params">(<span class="keyword">int</span> threadNum,String host,<span class="keyword">int</span> port,MsgService msgService,KvConfigService kvConfigService)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.executorService =</span><br><span class="line">        Executors.newFixedThreadPool(threadNum, <span class="keyword">new</span> ThreadFactoryImpl(<span class="string">"MsgConfirmServer_"</span>));</span><br><span class="line">    NettyServerConfig config=<span class="keyword">new</span> NettyServerConfig();</span><br><span class="line">    config.setListenPort(port);</span><br><span class="line">    server=<span class="keyword">new</span> NettyRemotingServer(config);</span><br><span class="line">    <span class="comment">//设置请求执行类</span></span><br><span class="line">    server.registerDefaultProcessor(<span class="keyword">new</span> MsgConfirmProcessor(msgService), executorService);</span><br><span class="line">    <span class="keyword">this</span>.kvConfigService=kvConfigService;</span><br><span class="line">    <span class="keyword">this</span>.address=host+<span class="string">":"</span>+port;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>MsgConfirmProcessor里的实现，就是简单的通过sendId查找消费结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> RemotingCommand <span class="title">processRequest</span><span class="params">(ChannelHandlerContext ctx, RemotingCommand request)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    MsgConsumerHeader requestHeader = (MsgConsumerHeader) request.decodeCommandCustomHeader(MsgConsumerHeader.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//查找通过发送id查找消费结果,如果没有记录说明还没被消费</span></span><br><span class="line">    MsgConsumer consumer=msgService.getBySendId(requestHeader.getSendId());</span><br><span class="line">    MsgConfirm confirm=<span class="keyword">new</span> MsgConfirm();</span><br><span class="line">    <span class="keyword">if</span>(consumer!=<span class="keyword">null</span>) &#123;</span><br><span class="line">        confirm.setBusState(consumer.getBusState());</span><br><span class="line">        confirm.setMsgConsumerId(consumer.getMsgConsumerId());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//封装结果</span></span><br><span class="line">    <span class="keyword">final</span> RemotingCommand response = RemotingCommand.createResponseCommand(<span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">byte</span>[] content = confirm.encode();</span><br><span class="line">    response.setBody(content);</span><br><span class="line">    response.setCode(ResponseCode.SUCCESS);</span><br><span class="line">    response.setRemark(<span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>封装请求的MsgConsumerHeader对象，里面只需要一个sendId参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MsgConsumerHeader</span>  <span class="keyword">implements</span> <span class="title">CommandCustomHeader</span></span>&#123;</span><br><span class="line">	<span class="comment">//消息发送id</span></span><br><span class="line">	<span class="keyword">private</span> Long sendId;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkFields</span><span class="params">()</span> <span class="keyword">throws</span> RemotingCommandException </span>&#123;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="顺序消费"><a href="#顺序消费" class="headerlink" title="顺序消费"></a>顺序消费</h1><p>通过以上的方案解决了重复消费，和最终一致性的问题。至于顺序消费，不太严格的情况下，只要将消息按key做分类，MessageQueue本身是有顺序的，通常请求下都能保证</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据key做hash保证相同的key进入相同的messagQueue</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">QueueSelector</span> <span class="keyword">implements</span> <span class="title">MessageQueueSelector</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> MessageQueue <span class="title">select</span><span class="params">(List&lt;MessageQueue&gt; mqs, Message msg, Object arg)</span> </span>&#123;</span><br><span class="line">        String s = arg + <span class="string">""</span>;</span><br><span class="line">        <span class="keyword">int</span> flag = Math.abs(s.hashCode());</span><br><span class="line">        <span class="keyword">int</span> no = flag % mqs.size();</span><br><span class="line">        <span class="keyword">return</span> mqs.get(no);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>比较严格的情况下，将tag作为顺序的标识，同一业务下，每次插入消息发送表的时候，通过业务id查询最大的tag和当前的tag比较，如果tag+1和当前的不符的话，说明还有消息未到达，需等会再消费</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">MAX</span>(tag) <span class="keyword">FROM</span> m_msgsend <span class="keyword">WHERE</span> busid=<span class="string">'xxxxx'</span>;</span><br></pre></td></tr></table></figure>
+<p><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">st=>start: 准备发送
+beginTx=>subroutine: 开启事务
+preSend=>operation: 插入发送表
+preSendResult=>condition: 插入结果
+sendFail=>end: 结束
+sendBus=>operation: 业务代码
+sendBusResult=>condition: 执行结果
+commitTx=>subroutine: 提交事务
+rollbackTx=>subroutine: 回滚事务
+sendMessage=>end: 发送消到MQ
+
+st->beginTx->preSend->preSendResult
+preSendResult(no)->rollbackTx->sendFail
+preSendResult(yes)->sendBus->sendBusResult
+sendBusResult(yes)->commitTx->sendMessage
+sendBusResult(no)->rollbackTx->sendFail</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">st=>start: 收到消息
+beginTx=>subroutine: 开始事务
+insertConsumer=>operation: 插入消费表
+insertReslut=>condition: 插入结果
+ignore=>end: 重复消息,忽略
+consumerBus=>operation: 业务代码
+consumerResult=>condition: 执行成功
+commitTx=>subroutine: 提交事务
+rollTx=>subroutine: 回滚事务
+consumerFail=>end: 系统异常,当做未消费处理
+consumerSuccess=>operation: 消费成功,记录业务状态
+sendResult=>operation: 向MQ发送消费结果
+st->beginTx->insertConsumer->insertReslut
+insertReslut(no)->ignore
+insertReslut(yes)->consumerBus->consumerResult
+consumerResult(yes)->commitTx->consumerSuccess->sendResult
+consumerResult(no)->rollTx->consumerFail</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script><textarea id="flowchart-2-code" style="display: none">st=>start: 收到消费结果
+cond=>condition: 业务是否成功
+success=>operation: 更新发送表
+end=>end: 流程结束
+rollback=>subroutine: 执行反向业务,更新发送表
+st->cond
+cond(yes)->success->end
+cond(no)->rollback->end</textarea><textarea id="flowchart-2-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-2-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-2-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-2", options);</script></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/rocketmq/" rel="tag"># rocketmq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/design/监控方案/" rel="next" title="监控系统设计">
+                <i class="fa fa-chevron-left"></i> 监控系统设计
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/uncategorized/名词解释/" rel="prev" title="名词解释">
+                名词解释 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives">
+                
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#发送"><span class="nav-number">1.</span> <span class="nav-text">发送</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程图"><span class="nav-number">1.1.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常点"><span class="nav-number">1.2.</span> <span class="nav-text">异常点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#接收"><span class="nav-number">2.</span> <span class="nav-text">接收</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程图-1"><span class="nav-number">2.1.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常点-1"><span class="nav-number">2.2.</span> <span class="nav-text">异常点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结果确认"><span class="nav-number">3.</span> <span class="nav-text">结果确认</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程图-2"><span class="nav-number">3.1.</span> <span class="nav-text">流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#异常点-2"><span class="nav-number">3.2.</span> <span class="nav-text">异常点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#补偿机制"><span class="nav-number">4.</span> <span class="nav-text">补偿机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#具体实现"><span class="nav-number">5.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#producer"><span class="nav-number">5.1.</span> <span class="nav-text">producer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#consumer"><span class="nav-number">5.2.</span> <span class="nav-text">consumer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定时任务"><span class="nav-number">5.3.</span> <span class="nav-text">定时任务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#顺序消费"><span class="nav-number">6.</span> <span class="nav-text">顺序消费</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+<span id="busuanzi_container_site_uv">
+  &nbsp;<span id="busuanzi_value_site_uv"></span>
+</span>
+
+<span>/</span>
+
+<span id="busuanzi_container_site_pv">
+    <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CIBUz5A0KNFv8xbAPO8ncqk6-gzGzoHsz", "YtGifAKqwENTTs9hhQ1GxdAG");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            
+            counter.save(null, {
+              success: function(counter) {
+                
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            
+              var newcounter = new Counter();
+              /* Set ACL */
+              var acl = new AV.ACL();
+              acl.setPublicReadAccess(true);
+              acl.setPublicWriteAccess(true);
+              newcounter.setACL(acl);
+              /* End Set ACL */
+              newcounter.set("title", title);
+              newcounter.set("url", url);
+              newcounter.set("time", 1);
+              newcounter.save(null, {
+                success: function(newcounter) {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+                },
+                error: function(newcounter, error) {
+                  console.log('Failed to create');
+                }
+              });
+            
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

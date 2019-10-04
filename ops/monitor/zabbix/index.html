@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="安装zabbix并添加自定义监控，通过模板实现监控项的自动添加">
+<meta name="keywords" content="zabbix">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zabbix使用">
+<meta property="og:url" content="http://yoursite.com/ops/monitor/zabbix/index.html">
+<meta property="og:site_name" content="我的云笔记">
+<meta property="og:description" content="安装zabbix并添加自定义监控，通过模板实现监控项的自动添加">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/blog/images/clipboard.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532601959606.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532602093961.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532602282270.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/clipboard-1533045789586.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1532643942576.png">
+<meta property="og:updated_time" content="2018-08-15T08:04:28.209Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zabbix使用">
+<meta name="twitter:description" content="安装zabbix并添加自定义监控，通过模板实现监控项的自动添加">
+<meta name="twitter:image" content="http://yoursite.com/blog/images/clipboard.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/ops/monitor/zabbix/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>zabbix使用 | 我的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5102824f4157d2cbdb282a1a889d910e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/ops/monitor/zabbix/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">zabbix使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-30 18:01:30" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-08-15 16:04:28" itemprop="dateModified" datetime="2018-08-15T16:04:28+08:00">2018-08-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/ops/" itemprop="url" rel="index"><span itemprop="name">ops</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/ops/monitor/" itemprop="url" rel="index"><span itemprop="name">monitor</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/ops/monitor/zabbix/" class="leancloud_visitors" data-flag-title="zabbix使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>安装zabbix并添加自定义监控，通过模板实现监控项的自动添加</p>
+<a id="more"></a>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="yum源方式"><a href="#yum源方式" class="headerlink" title="yum源方式"></a>yum源方式</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rpm -i https://repo.zabbix.com/zabbix/3.4/rhel/7/x86_64/zabbix-release-3.4-2.el7.noarch.rpm</span><br><span class="line">yum install zabbix-server-mysql zabbix-web-mysql zabbix-agent</span><br></pre></td></tr></table></figure>
+<h3 id="初始化数据库"><a href="#初始化数据库" class="headerlink" title="初始化数据库"></a>初始化数据库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># mysql -uroot -p</span><br><span class="line">password</span><br><span class="line">mysql&gt; create database zabbix character set utf8 collate utf8_bin;</span><br><span class="line">mysql&gt; grant all privileges on zabbix.* to zabbix@localhost identified by &apos;password&apos;;</span><br><span class="line">mysql&gt; quit;</span><br></pre></td></tr></table></figure>
+<h3 id="导入数据"><a href="#导入数据" class="headerlink" title="导入数据"></a>导入数据</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -uzabbix -p zabbix</span><br></pre></td></tr></table></figure>
+<h3 id="配置zabbix-serve"><a href="#配置zabbix-serve" class="headerlink" title="配置zabbix_serve"></a>配置zabbix_serve</h3><p>/etc/zabbix/zabbix_server.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DBPassword=password</span><br></pre></td></tr></table></figure>
+<h3 id="修改php"><a href="#修改php" class="headerlink" title="修改php"></a>修改php</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># php_value date.timezone Europe/Riga</span><br></pre></td></tr></table></figure>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># systemctl restart zabbix-server zabbix-agent httpd</span><br><span class="line"># systemctl enable zabbix-server zabbix-agent httpd</span><br></pre></td></tr></table></figure>
+<h2 id="ISO方式"><a href="#ISO方式" class="headerlink" title="ISO方式"></a>ISO方式</h2><ul>
+<li>Linux Ubuntu用户名及密码：<br>appliance/zabbix<br>root没有初始密码，sudo passwd root可配置root密码</li>
+<li>zabbix web用户名及密码<br>Admin/zabbix</li>
+</ul>
+<h1 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h1><h2 id="启动-1"><a href="#启动-1" class="headerlink" title="启动"></a>启动</h2><p>systemctl start mysqld.service</p>
+<h2 id="查询登录密码"><a href="#查询登录密码" class="headerlink" title="查询登录密码"></a>查询登录密码</h2><p>grep ‘temporary password’ /var/log/mysqld.log</p>
+<h2 id="修改密码政策"><a href="#修改密码政策" class="headerlink" title="修改密码政策"></a>修改密码政策</h2><p>set global validate_password_policy=0;</p>
+<p>set global validate_password_length=1;</p>
+<h2 id="设置密码"><a href="#设置密码" class="headerlink" title="设置密码"></a>设置密码</h2><p>SET PASSWORD = PASSWORD(‘123456’);</p>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>yum install zabbix-get</p>
+<p>zabbix_get -s 127.0.0.1 -p 10050 -k “system.cpu.load[all,avg1]”</p>
+<h2 id="无数据"><a href="#无数据" class="headerlink" title="无数据"></a>无数据</h2><p>检查服务是否启动</p>
+<p>lsof -i:10051</p>
+<p>查看日志</p>
+<p>/var/log/zabbix/zabbix_server</p>
+<h2 id="Permission-denied"><a href="#Permission-denied" class="headerlink" title="Permission denied"></a>Permission denied</h2><p>curl: (7) Failed to connect to 192.168.1.103: Permission denied</p>
+<p>关闭Selinux</p>
+<p>setenforce 0</p>
+<h1 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h1><h2 id="重启"><a href="#重启" class="headerlink" title="重启"></a>重启</h2><p>service zabbix-server restart </p>
+<p>systemctl restart zabbix-agent.service</p>
+<h1 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h1><p>改为主动式</p>
+<p>配置主机名称和和zabbix_agentd.conf中的Hostname配置一样  </p>
+<h1 id="自定义配置"><a href="#自定义配置" class="headerlink" title="自定义配置"></a>自定义配置</h1><h2 id="zabbix发现流程"><a href="#zabbix发现流程" class="headerlink" title="zabbix发现流程"></a>zabbix发现流程</h2><p><img src="/blog/images/clipboard.png" alt="img"> </p>
+<h2 id="提供接口"><a href="#提供接口" class="headerlink" title="提供接口"></a>提供接口</h2><p>发现接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query</span>(name=<span class="string">"提供给zabbix用于自动发现的接口"</span>,path=<span class="string">"zabbix"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">zabbix</span><span class="params">(String host,Integer port)</span></span>&#123;</span><br><span class="line">    List list=<span class="keyword">new</span> ArrayList();</span><br><span class="line">    TimeMonitor tm=(TimeMonitor) MonitorFacade.getMonitor(MonitorFacade.HTTP_MONITOR);</span><br><span class="line">    tm.getMap().forEach((name,st)-&gt;&#123;</span><br><span class="line">        Map map=<span class="keyword">new</span> LinkedHashMap();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;st.getAccuracy().length;i++) &#123;</span><br><span class="line">            map.put(<span class="string">"&#123;#ITEM"</span>+i+<span class="string">"&#125;"</span>,st.getAccuracy()[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        map.put(<span class="string">"&#123;#NAME&#125;"</span>,name);</span><br><span class="line">        map.put(<span class="string">"&#123;#URL&#125;"</span>, <span class="string">"/app/monitor/getItem"</span>);</span><br><span class="line">        list.add(map);</span><br><span class="line">    &#125;);</span><br><span class="line">    Map map=<span class="keyword">new</span> HashMap();</span><br><span class="line">    map.put(<span class="string">"data"</span>, list);</span><br><span class="line">    <span class="keyword">return</span> jsonUtil.toString(map);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>取值接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query</span>(name=<span class="string">"获取单个统计项的值"</span>,path=<span class="string">"getItem"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getItem</span><span class="params">(String name,String item)</span></span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeMonitor tm=(TimeMonitor) MonitorFacade.getMonitor(MonitorFacade.HTTP_MONITOR);</span><br><span class="line">        TimeStatist st=tm.get(name);</span><br><span class="line">        <span class="keyword">if</span>(st==<span class="keyword">null</span>) &#123;</span><br><span class="line">            log.info(<span class="string">"找不到监控项:"</span>+name);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"0"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> num=Integer.parseInt(item);</span><br><span class="line">        <span class="keyword">return</span> st.getAccuracyCount()[num].get()+<span class="string">""</span>;</span><br><span class="line">    &#125;<span class="keyword">catch</span>(Exception ex) &#123;</span><br><span class="line">        ex.printStackTrace();</span><br><span class="line">        log.error(<span class="string">"请求参数不正确:"</span>+name+<span class="string">":"</span>+item+<span class="string">","</span>+ex.getMessage());</span><br><span class="line">        <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="自定义参数"><a href="#自定义参数" class="headerlink" title="自定义参数"></a>自定义参数</h2><p>将此文件上传到/etc/zabbix/zabbix_agentd.d目录下,并重启agent</p>
+<p>userparameter_responsetimel.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UserParameter=getItems[*],curl &apos;http://$1:$2/app/monitor/zabbix?host=$1&amp;port=$2&apos; 2&gt;/dev/null</span><br><span class="line">UserParameter=getItemValue[*],curl &apos;http://$1:$2$3?name=$4&amp;item=$5&apos; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+<h3 id="自动发现"><a href="#自动发现" class="headerlink" title="自动发现"></a>自动发现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#直接访问</span><br><span class="line">curl http://192.168.1.103:8080/app/monitor/zabbix</span><br><span class="line">#配置</span><br><span class="line">UserParameter=getItems[*],curl &apos;http://$1:$2/app/monitor/zabbix?host=$1&amp;port=$2&apos; 2&gt;/dev/null</span><br><span class="line">#验证</span><br><span class="line">zabbix_get -s 192.168.1.105 -p 10050 -k &quot;getItems[192.168.1.103,8080,time]&quot;</span><br></pre></td></tr></table></figure>
+<p>返回内容</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"data"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"&#123;#ITEM0&#125;"</span>: <span class="string">"5"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM1&#125;"</span>: <span class="string">"10"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM2&#125;"</span>: <span class="string">"100"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM3&#125;"</span>: <span class="string">"500"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM4&#125;"</span>: <span class="string">"1000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM5&#125;"</span>: <span class="string">"5000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#NAME&#125;"</span>: <span class="string">"/app/monitor/zabbix"</span>,</span><br><span class="line">      <span class="attr">"&#123;#URL&#125;"</span>: <span class="string">"/app/monitor/getItem"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"&#123;#ITEM0&#125;"</span>: <span class="string">"5"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM1&#125;"</span>: <span class="string">"10"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM2&#125;"</span>: <span class="string">"100"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM3&#125;"</span>: <span class="string">"500"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM4&#125;"</span>: <span class="string">"1000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM5&#125;"</span>: <span class="string">"5000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#NAME&#125;"</span>: <span class="string">"httpRequest.totalrequest"</span>,</span><br><span class="line">      <span class="attr">"&#123;#URL&#125;"</span>: <span class="string">"/app/monitor/getItem"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"&#123;#ITEM0&#125;"</span>: <span class="string">"5"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM1&#125;"</span>: <span class="string">"10"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM2&#125;"</span>: <span class="string">"100"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM3&#125;"</span>: <span class="string">"500"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM4&#125;"</span>: <span class="string">"1000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#ITEM5&#125;"</span>: <span class="string">"5000"</span>,</span><br><span class="line">      <span class="attr">"&#123;#NAME&#125;"</span>: <span class="string">"/app/monitor/getItem"</span>,</span><br><span class="line">      <span class="attr">"&#123;#URL&#125;"</span>: <span class="string">"/app/monitor/getItem"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"success"</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="attr">"state"</span>: <span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="获取某项的值"><a href="#获取某项的值" class="headerlink" title="获取某项的值"></a>获取某项的值</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#直接访问</span><br><span class="line">curl http://192.168.1.103:8080/app/monitor/getItem?name=/app/monitor/zabbix&amp;item=0</span><br><span class="line">#配置</span><br><span class="line">UserParameter=getItemValue[*],curl &apos;http://$1:$2$3?name=$4&amp;item=$5&apos; 2&gt;/dev/nul</span><br><span class="line">#验证</span><br><span class="line">zabbix_get -s 192.168.1.105 -p 10050 -k &quot;getItemValue[192.168.1.103,8080,/app/monitor/timeValue,/app/monitor/time,0]&quot;</span><br></pre></td></tr></table></figure>
+<p>返回内容</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span></span><br></pre></td></tr></table></figure>
+<h2 id="配置模板"><a href="#配置模板" class="headerlink" title="配置模板"></a>配置模板</h2><h3 id="新增模板"><a href="#新增模板" class="headerlink" title="新增模板"></a>新增模板</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Templates-&gt;Create Template</span><br><span class="line"></span><br><span class="line">Template name:httpTemplate</span><br><span class="line"></span><br><span class="line">Add</span><br></pre></td></tr></table></figure>
+<h3 id="新增发现规则"><a href="#新增发现规则" class="headerlink" title="新增发现规则"></a>新增发现规则</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Templates-&gt;httpTemplate-&gt;Discovery rules-&gt;Create discovery rule</span><br><span class="line"></span><br><span class="line">Name:httpDiscovery</span><br><span class="line"></span><br><span class="line">Type:Zabbix agent/Zabbix agent(active)</span><br><span class="line"></span><br><span class="line">Key :getItems[&#123;$MONITOR_HOST&#125;,&#123;$MONITOR_PORT&#125;]</span><br><span class="line"></span><br><span class="line">点击Add</span><br></pre></td></tr></table></figure>
+<h3 id="新增监控项-Item-prototypes"><a href="#新增监控项-Item-prototypes" class="headerlink" title="新增监控项(Item prototypes)"></a>新增监控项(Item prototypes)</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Templates-&gt;httpTemplate-&gt;Discovery rules-&gt;httpDiscovery-&gt;Item prototypes-&gt;Create item prototype</span><br><span class="line"></span><br><span class="line">Name:&#123;#NAME&#125;_&#123;#ITEM0&#125;</span><br><span class="line"></span><br><span class="line">Type:Zabbix agent/Zabbix agent(active)</span><br><span class="line"></span><br><span class="line">Key:getItemValue[&#123;$MONITOR_HOST&#125;,&#123;$MONITOR_PORT&#125;,&#123;#URL&#125;,&#123;#NAME&#125;,0]</span><br><span class="line"></span><br><span class="line">点击Add</span><br></pre></td></tr></table></figure>
+<p>继续添加item1,2,3,4,5</p>
+<p><img src="/blog/images/1532601959606.png" alt="1532601959606"></p>
+<h3 id="监控图-Graph-prototypes"><a href="#监控图-Graph-prototypes" class="headerlink" title="监控图(Graph prototypes)"></a>监控图(Graph prototypes)</h3><p>Templates-&gt;httpTemplate-&gt;Graph prototypes-&gt;Create graph prototype</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Name:&#123;#NAME&#125;</span><br><span class="line">Graph type:Stacked</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Add prototype</li>
+</ul>
+<p><img src="/blog/images/1532602093961.png" alt="1532602093961"></p>
+<p> Add</p>
+<h3 id="将模板关联到目标主机"><a href="#将模板关联到目标主机" class="headerlink" title="将模板关联到目标主机"></a>将模板关联到目标主机</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">host-&gt;要监控的host-&gt;Templates-&gt;select-&gt;	httpTemplate-&gt;Select-&gt;Add-&gt;Update</span><br><span class="line"></span><br><span class="line">host-&gt;要监控的host-&gt;Macros</span><br><span class="line"></span><br><span class="line">&#123;$MONITOR_HOST&#125;:192.168.1.103</span><br><span class="line"></span><br><span class="line">add</span><br><span class="line"></span><br><span class="line">&#123;$MONITOR_PORT&#125;:8080</span><br><span class="line"></span><br><span class="line">update</span><br></pre></td></tr></table></figure>
+<p><img src="/blog/images/1532602282270.png" alt="1532602282270"></p>
+<p>最终效果</p>
+<p><img src="/blog/images/clipboard-1533045789586.png" alt="img"> </p>
+<h1 id="中文"><a href="#中文" class="headerlink" title="中文"></a>中文</h1><p>修改系统语言</p>
+<p><img src="/blog/images/1532643942576.png" alt="1532643942576"></p>
+<p>替换字体</p>
+<ol>
+<li>到C:\Windows\Fonts下找到需要的字体上传到/usr/share/zabbix/fonts</li>
+<li>备份原字体</li>
+<li>替换</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>备份</span><br><span class="line">mv /usr/share/zabbix/fonts/graphfont.ttf /usr/share/zabbix/fonts/graphfont.ttf.bak</span><br><span class="line"><span class="meta">#</span>替换</span><br><span class="line">ln /usr/share/zabbix/fonts/SIMFANG.TTF /usr/share/zabbix/fonts/graphfont.ttf</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/zabbix/" rel="tag"># zabbix</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/manual/manual/lazydoc/" rel="next" title="lazydoc使用手册">
+                <i class="fa fa-chevron-left"></i> lazydoc使用手册
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/code/java/多线程/" rel="prev" title="多线程">
+                多线程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives">
+                
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#yum源方式"><span class="nav-number">1.1.</span> <span class="nav-text">yum源方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化数据库"><span class="nav-number">1.1.1.</span> <span class="nav-text">初始化数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#导入数据"><span class="nav-number">1.1.2.</span> <span class="nav-text">导入数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置zabbix-serve"><span class="nav-number">1.1.3.</span> <span class="nav-text">配置zabbix_serve</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改php"><span class="nav-number">1.1.4.</span> <span class="nav-text">修改php</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动"><span class="nav-number">1.1.5.</span> <span class="nav-text">启动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ISO方式"><span class="nav-number">1.2.</span> <span class="nav-text">ISO方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#mysql"><span class="nav-number">2.</span> <span class="nav-text">mysql</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动-1"><span class="nav-number">2.1.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查询登录密码"><span class="nav-number">2.2.</span> <span class="nav-text">查询登录密码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改密码政策"><span class="nav-number">2.3.</span> <span class="nav-text">修改密码政策</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置密码"><span class="nav-number">2.4.</span> <span class="nav-text">设置密码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#无数据"><span class="nav-number">3.1.</span> <span class="nav-text">无数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Permission-denied"><span class="nav-number">3.2.</span> <span class="nav-text">Permission denied</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常用命令"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#重启"><span class="nav-number">4.1.</span> <span class="nav-text">重启</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#优化"><span class="nav-number">5.</span> <span class="nav-text">优化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义配置"><span class="nav-number">6.</span> <span class="nav-text">自定义配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#zabbix发现流程"><span class="nav-number">6.1.</span> <span class="nav-text">zabbix发现流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提供接口"><span class="nav-number">6.2.</span> <span class="nav-text">提供接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义参数"><span class="nav-number">6.3.</span> <span class="nav-text">自定义参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自动发现"><span class="nav-number">6.3.1.</span> <span class="nav-text">自动发现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取某项的值"><span class="nav-number">6.3.2.</span> <span class="nav-text">获取某项的值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置模板"><span class="nav-number">6.4.</span> <span class="nav-text">配置模板</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新增模板"><span class="nav-number">6.4.1.</span> <span class="nav-text">新增模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新增发现规则"><span class="nav-number">6.4.2.</span> <span class="nav-text">新增发现规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新增监控项-Item-prototypes"><span class="nav-number">6.4.3.</span> <span class="nav-text">新增监控项(Item prototypes)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监控图-Graph-prototypes"><span class="nav-number">6.4.4.</span> <span class="nav-text">监控图(Graph prototypes)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将模板关联到目标主机"><span class="nav-number">6.4.5.</span> <span class="nav-text">将模板关联到目标主机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#中文"><span class="nav-number">7.</span> <span class="nav-text">中文</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+<span id="busuanzi_container_site_uv">
+  &nbsp;<span id="busuanzi_value_site_uv"></span>
+</span>
+
+<span>/</span>
+
+<span id="busuanzi_container_site_pv">
+    <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CIBUz5A0KNFv8xbAPO8ncqk6-gzGzoHsz", "YtGifAKqwENTTs9hhQ1GxdAG");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            
+            counter.save(null, {
+              success: function(counter) {
+                
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            
+              var newcounter = new Counter();
+              /* Set ACL */
+              var acl = new AV.ACL();
+              acl.setPublicReadAccess(true);
+              acl.setPublicWriteAccess(true);
+              newcounter.setACL(acl);
+              /* End Set ACL */
+              newcounter.set("title", title);
+              newcounter.set("url", url);
+              newcounter.set("time", 1);
+              newcounter.save(null, {
+                success: function(newcounter) {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+                },
+                error: function(newcounter, error) {
+                  console.log('Failed to create');
+                }
+              });
+            
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
