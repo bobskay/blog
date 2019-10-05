@@ -117,11 +117,12 @@
 <meta property="og:description" content="多线程个人理解">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/blog/images/1533045448882.png">
+<meta property="og:image" content="http://yoursite.com/blog/images/1534676763171.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1533287473905.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1533290345905.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1533290378691.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1533283176589.png">
-<meta property="og:updated_time" content="2018-08-03T11:12:48.559Z">
+<meta property="og:updated_time" content="2019-01-24T23:29:49.617Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="多线程">
 <meta name="twitter:description" content="多线程个人理解">
@@ -395,7 +396,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-08-03 19:12:48" itemprop="dateModified" datetime="2018-08-03T19:12:48+08:00">2018-08-03</time>
+                <time title="修改时间：2019-01-25 07:29:49" itemprop="dateModified" datetime="2019-01-25T07:29:49+08:00">2019-01-25</time>
               
             
           </span>
@@ -468,7 +469,7 @@
 <a id="more"></a>
 <h1 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h1><h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>这一点，跟数据库事务的原子性概念差不多，即一个操作（有可能包含有多个子操作）要么全部执行（生效），要么全部都不执行（都不生效）。</p>
 <h3 id="CAS（compare-and-swap）"><a href="#CAS（compare-and-swap）" class="headerlink" title="CAS（compare and swap）"></a>CAS（compare and swap）</h3><p>CAS是CPU指令</p>
-<p>基础类型变量自增（i++）是一种常被新手误以为是原子操作而实际不是的操作。Java中提供了对应的原子操作类来实现该操作，并保证原子性，其本质是利用了CPU级别的CAS指令。由于是CPU级别的指令，其开销比需要操作系统参与的锁的开销小。AtomicInteger使用方法如下。</p>
+<p>基础类型变量自增（i++）是一种常被新手误以为是原子操作而实际不是的操作。Java中提供了对应的原子操作类来实现该操作，并保证原子性，其本质是利用了CPU级别的CAS指令。由于是CPU级别的指令，其开销比需要操作系统参与的锁的开销小。</p>
 <h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>可见性是指，当多个线程并发访问共享变量时，一个线程对共享变量的修改，其它线程能够立即看到。可见性问题是好多人忽略或者理解错误的一点。</p>
 <p>CPU从主内存中读数据的效率相对来说不高，现在主流的计算机中，都有几级缓存。每个线程读取共享变量时，都会将该变量加载进其对应CPU的高速缓存里，修改该变量后，CPU会立即更新该缓存，但并不一定会立即将其写回主内存（实际上写回主内存的时间不可预期）。此时其它线程（尤其是不在同一个CPU上执行的线程）访问该变量时，从主内存中读到的就是旧的数据，而非第一个线程更新后的数据。</p>
 <p>这一点是操作系统或者说是硬件层面的机制，所以很多应用开发人员经常会忽略。</p>
@@ -491,7 +492,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">示例说明：</span><br><span class="line">double r = 2.1; //(1) </span><br><span class="line">double pi = 3.14;//(2) </span><br><span class="line">double area = pi*r*r;//(3)1234</span><br></pre></td></tr></table></figure>
 <p>  虽然代码语句的定义顺序为1-&gt;2-&gt;3，但是计算顺序1-&gt;2-&gt;3与2-&gt;1-&gt;3对结果并无影响，所以编译时和运行时可以根据需要对1、2语句进行重排序。</p>
 <h2 id="2-2-指令重排带来的问题"><a href="#2-2-指令重排带来的问题" class="headerlink" title="2.2 指令重排带来的问题"></a>2.2 指令重排带来的问题</h2><p>如果一个操作不是原子的，就会给JVM留下重排的机会。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">线程A中</span><br><span class="line">&#123;</span><br><span class="line">    context = loadContext();</span><br><span class="line">    inited = true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">线程B中</span><br><span class="line">&#123;</span><br><span class="line">    if (inited) </span><br><span class="line">        fun(context);</span><br><span class="line">&#125;1234567891011</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">线程A中</span><br><span class="line">&#123;</span><br><span class="line">    context = loadContext();</span><br><span class="line">    inited = true;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">线程B中</span><br><span class="line">&#123;</span><br><span class="line">    if (inited) </span><br><span class="line">        fun(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>  如果线程A中的指令发生了重排序，那么B中很可能就会拿到一个尚未初始化或尚未初始化完成的context,从而引发程序错误。</p>
 <h2 id="2-3-禁止指令重排的原理"><a href="#2-3-禁止指令重排的原理" class="headerlink" title="2.3 禁止指令重排的原理"></a>2.3 禁止指令重排的原理</h2><p>  volatile关键字提供内存屏障的方式来防止指令被重排，编译器在生成字节码文件时，会在指令序列中插入内存屏障来禁止特定类型的处理器重排序。</p>
 <p>  JVM内存屏障插入策略：</p>
@@ -501,6 +502,8 @@
 <li>在每个volatile读操作的后面插入一个LoadLoad屏障；</li>
 <li>在每个volatile读操作的后面插入一个LoadStore屏障。</li>
 </ol>
+<h1 id="实际使用"><a href="#实际使用" class="headerlink" title="实际使用"></a>实际使用</h1><p>volatile保证每次修改值都会写到主内存中去</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainTest</span> </span>&#123;</span><br><span class="line">    <span class="comment">//加volatile关键字最后输出的是1,没加最后输出的是0,,如果thread2操作过慢也会输出0</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> i = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> x = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                i = <span class="keyword">true</span>;</span><br><span class="line">                i = <span class="keyword">false</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i == <span class="keyword">true</span>) &#123;</span><br><span class="line">                    x++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(x);</span><br><span class="line">        System.exit(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="代码锁"><a href="#代码锁" class="headerlink" title="代码锁"></a>代码锁</h1><h2 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h2><p>AQS即是AbstractQueuedSynchronizer，一个用来构建锁和同步工具的框架，包括常用的ReentrantLock、CountDownLatch、Semaphore等。 </p>
 <p>公平非公平</p>
 <ul>
@@ -518,9 +521,7 @@
 <h3 id="tryAcquire"><a href="#tryAcquire" class="headerlink" title="tryAcquire()"></a>tryAcquire()</h3><p>​    尝试去获取独占资源。如果获取成功，则直接返回true，否则直接返回false。</p>
 <h3 id="addWaiter"><a href="#addWaiter" class="headerlink" title="addWaiter()"></a>addWaiter()</h3><p>​    当前线程加入到等待队列的队尾，并返回当前线程所在的结点 </p>
 <h3 id="acquireQueued"><a href="#acquireQueued" class="headerlink" title="acquireQueued()"></a>acquireQueued()</h3><p>​    使线程在等待队列中获取资源，一直获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。</p>
-<p>​    如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。</p>
-<div id="flowchart-0" class="flow-chart"></div>
-
+<p>​    如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。<img src="/blog/images/1534676763171.png" alt="1534676763171"></p>
 <h1 id="JAVA锁"><a href="#JAVA锁" class="headerlink" title="JAVA锁"></a>JAVA锁</h1><p>对象在内存中的头信息</p>
 <p><img src="/blog/images/1533287473905.png" alt="1533287473905"></p>
 <p>自旋–&gt;偏向–&gt;轻量级–&gt;重量级</p>
@@ -530,7 +531,8 @@
 3. 如果失败，则说明发生竞争，撤销偏向锁，进而升级为轻量级锁。 
 4. 当前线程使用CAS将对象头的Mark Word替换为锁记录指针，如果成功，当前线程获得锁 
 5. 如果失败，表示其他线程竞争锁，当前线程便尝试使用自旋来获取锁。  
-6. 如果自旋成功则依然处于轻量级状态。  7. 如果自旋失败，则升级为重量级锁。 
+6. 如果自旋成功则依然处于轻量级状态。  
+7. 7. 如果自旋失败，则升级为重量级锁。 
 </code></pre><h2 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h2><p>线程的阻塞和唤醒需要CPU从用户态转为核心态 ，比较耗时</p>
 <p>如果本身任务时间很短，通过不断循环的方式抢占cup时间片，已达到等待不阻塞线程</p>
 <h2 id="适应自旋锁"><a href="#适应自旋锁" class="headerlink" title="适应自旋锁"></a>适应自旋锁</h2><p>JDK 1.6引入机制，通过计算自旋成功率，自动判断是否需要升级锁</p>
@@ -564,7 +566,9 @@
 <p>还有一个注意点：等待轻量锁的线程不会阻塞，它会一直自旋等待锁，并如上所说修改markword。</p>
 <p>这就是自旋锁，尝试获取锁的线程，在没有获得锁的时候，不被挂起，而转而去执行一个空循环，即自旋。在若干个自旋后，如果还没有获得锁，则才被挂起，获得锁，则执行代码。</p>
 <h2 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h2><p>操作系统的互斥锁(Mutex Lock)来实现 </p>
-<p>参考资料 <a href="https://blog.csdn.net/zqz_zqz/article/details/70233767" target="_blank" rel="noopener">https://blog.csdn.net/zqz_zqz/article/details/70233767</a></p>
+<p>参考资料</p>
+<p><a href="https://blog.csdn.net/zqz_zqz/article/details/70233767" target="_blank" rel="noopener">https://blog.csdn.net/zqz_zqz/article/details/70233767</a></p>
+<p><a href="https://blog.csdn.net/u012722531/article/details/78244786" target="_blank" rel="noopener">https://blog.csdn.net/u012722531/article/details/78244786</a></p>
 <h1 id="Thread"><a href="#Thread" class="headerlink" title="Thread"></a>Thread</h1><p>常用方法</p>
 <ol>
 <li>Thread.sleep(long millis)，一定是当前线程调用此方法，当前线程进入TIME_WAITING状态，但不释放对象锁，millis后线程自动苏醒进入就绪状态。作用：给其它线程执行机会的最佳方式。</li>
@@ -580,22 +584,9 @@
 <p>TIMED_WAITING：等待，加上时间</p>
 <p>TERMINATED：线程结束</p>
 <p><img src="/blog/images/1533283176589.png" alt="1533283176589"></p>
-<div id="flowchart-1" class="flow-chart"></div>
+<div id="flowchart-0" class="flow-chart"></div><br># 锁膨胀过程<br><br><div id="flowchart-1" class="flow-chart"></div>
 
-<p><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">st=>start: 开始
-op=>operation: 进入队列
-op1=>operation: 查找安全点
-op3=>operation: 等待
-quire=>condition: tryAcquire()
-second=>condition: 获得资格
-first=>operation: 队伍第一个
-e=>end: 结束
-st->quire
-quire(no)->op(right)->op1->op3->second
-second(yes)->first
-second(no,right)->op1
-first(right)->e
-quire(yes,right)->e</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">st=>start: new
+<p><script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">st=>start: new
 dead=>end: dead
 runnable=>subroutine: runnable
 run2=>subroutine: runnable
@@ -632,7 +623,42 @@ doJoin(yes)->block
 lock->getLock->run2
 block->endblock->run2
 wait->doNotify->lock
-run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></p>
+run2->run3</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script><textarea id="flowchart-1-code" style="display: none">st=>start: 开始
+prelock=>operation: 遇到同步语句
+empty=>condition: 无锁
+setThread0=>operation: 
+setThread=>operation: 当markdown设置为当前线程,状态为偏向锁
+isbiasedLock=>condition: 偏向锁
+cancelBiasedLock=>condition: 当前线程和偏向id一样
+spin=>operation: 清空markdown信息,准备膨胀
+run=>operation: 执行同步代码
+ed=>end: 结束
+spinLock=>获得锁
+spinCond=>condition: 自旋获得锁
+updateThread=>operation: markdown设置为当前线程
+copylight=>operation: 复制锁信息到当前线程
+wrightLight=>operation: 将轻量级锁指针指到当前线程
+lightLock=>operation: 轻量级锁
+weightLock0=>operation: 
+weightLock1=>operation: 
+weightLock2=>operation: 
+weightLock3=>operation: 
+weightLock=>operation: 膨胀为重量级锁
+run2=>operation: 执行同步代码
+callbackLight=>condition: cas回写lock信息成功
+ed2=>end: 结束
+
+st->prelock->empty
+empty(yes)->setThread0->setThread->run->ed
+empty(no)->isbiasedLock
+isbiasedLock(yes)->cancelBiasedLock
+isbiasedLock(no)->spin
+cancelBiasedLock(yes)->setThread
+cancelBiasedLock(no)->spin->copylight
+spinCond(no)->copylight->wrightLight->callbackLight
+callbackLight(yes,right)->lightLock->ed2
+callbackLight(no)->spinCond
+spinCond(no)->weightLock</textarea><textarea id="flowchart-1-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-1-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-1-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-1", options);</script></p>
 
       
     </div>
@@ -748,7 +774,7 @@ run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -795,7 +821,23 @@ run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"
                     
                       
                     
-                    <span class="site-state-item-count">17</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -860,7 +902,45 @@ run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">45</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -896,7 +976,7 @@ run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#多线程"><span class="nav-number">1.</span> <span class="nav-text">多线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原子性"><span class="nav-number">1.1.</span> <span class="nav-text">原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS（compare-and-swap）"><span class="nav-number">1.1.1.</span> <span class="nav-text">CAS（compare and swap）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可见性"><span class="nav-number">1.2.</span> <span class="nav-text">可见性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顺序性"><span class="nav-number">1.3.</span> <span class="nav-text">顺序性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#happens-before"><span class="nav-number">2.</span> <span class="nav-text">happens-before</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#volatile关键字及其作用"><span class="nav-number">3.</span> <span class="nav-text">volatile关键字及其作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-保证内存可见性"><span class="nav-number">4.</span> <span class="nav-text">1 保证内存可见性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-基本概念"><span class="nav-number">4.1.</span> <span class="nav-text">1.1 基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-实现原理"><span class="nav-number">4.2.</span> <span class="nav-text">1.2 实现原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-禁止指令重排"><span class="nav-number">5.</span> <span class="nav-text">2 禁止指令重排</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-基本概念"><span class="nav-number">5.1.</span> <span class="nav-text">2.1 基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-指令重排带来的问题"><span class="nav-number">5.2.</span> <span class="nav-text">2.2 指令重排带来的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-禁止指令重排的原理"><span class="nav-number">5.3.</span> <span class="nav-text">2.3 禁止指令重排的原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码锁"><span class="nav-number">6.</span> <span class="nav-text">代码锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AQS"><span class="nav-number">6.1.</span> <span class="nav-text">AQS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CyclicBarrier"><span class="nav-number">6.2.</span> <span class="nav-text">CyclicBarrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch和CyclicBarrier"><span class="nav-number">6.3.</span> <span class="nav-text">CountDownLatch和CyclicBarrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch-底层实现"><span class="nav-number">6.4.</span> <span class="nav-text">CountDownLatch 底层实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tryAcquire"><span class="nav-number">6.4.1.</span> <span class="nav-text">tryAcquire()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addWaiter"><span class="nav-number">6.4.2.</span> <span class="nav-text">addWaiter()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#acquireQueued"><span class="nav-number">6.4.3.</span> <span class="nav-text">acquireQueued()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JAVA锁"><span class="nav-number">7.</span> <span class="nav-text">JAVA锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自旋锁"><span class="nav-number">7.1.</span> <span class="nav-text">自旋锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#适应自旋锁"><span class="nav-number">7.2.</span> <span class="nav-text">适应自旋锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁消除"><span class="nav-number">7.3.</span> <span class="nav-text">锁消除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁粗化"><span class="nav-number">7.4.</span> <span class="nav-text">锁粗化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#偏向锁"><span class="nav-number">7.5.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#轻量级锁"><span class="nav-number">7.6.</span> <span class="nav-text">轻量级锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#轻量级锁的释放"><span class="nav-number">7.6.1.</span> <span class="nav-text">轻量级锁的释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重量级锁"><span class="nav-number">7.7.</span> <span class="nav-text">重量级锁</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thread"><span class="nav-number">8.</span> <span class="nav-text">Thread</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程状态转换"><span class="nav-number">9.</span> <span class="nav-text">线程状态转换</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#多线程"><span class="nav-number">1.</span> <span class="nav-text">多线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#原子性"><span class="nav-number">1.1.</span> <span class="nav-text">原子性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS（compare-and-swap）"><span class="nav-number">1.1.1.</span> <span class="nav-text">CAS（compare and swap）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可见性"><span class="nav-number">1.2.</span> <span class="nav-text">可见性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顺序性"><span class="nav-number">1.3.</span> <span class="nav-text">顺序性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#happens-before"><span class="nav-number">2.</span> <span class="nav-text">happens-before</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#volatile关键字及其作用"><span class="nav-number">3.</span> <span class="nav-text">volatile关键字及其作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-保证内存可见性"><span class="nav-number">4.</span> <span class="nav-text">1 保证内存可见性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-基本概念"><span class="nav-number">4.1.</span> <span class="nav-text">1.1 基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-实现原理"><span class="nav-number">4.2.</span> <span class="nav-text">1.2 实现原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-禁止指令重排"><span class="nav-number">5.</span> <span class="nav-text">2 禁止指令重排</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-基本概念"><span class="nav-number">5.1.</span> <span class="nav-text">2.1 基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-指令重排带来的问题"><span class="nav-number">5.2.</span> <span class="nav-text">2.2 指令重排带来的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-禁止指令重排的原理"><span class="nav-number">5.3.</span> <span class="nav-text">2.3 禁止指令重排的原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实际使用"><span class="nav-number">6.</span> <span class="nav-text">实际使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码锁"><span class="nav-number">7.</span> <span class="nav-text">代码锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AQS"><span class="nav-number">7.1.</span> <span class="nav-text">AQS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CyclicBarrier"><span class="nav-number">7.2.</span> <span class="nav-text">CyclicBarrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch和CyclicBarrier"><span class="nav-number">7.3.</span> <span class="nav-text">CountDownLatch和CyclicBarrier</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CountDownLatch-底层实现"><span class="nav-number">7.4.</span> <span class="nav-text">CountDownLatch 底层实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tryAcquire"><span class="nav-number">7.4.1.</span> <span class="nav-text">tryAcquire()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#addWaiter"><span class="nav-number">7.4.2.</span> <span class="nav-text">addWaiter()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#acquireQueued"><span class="nav-number">7.4.3.</span> <span class="nav-text">acquireQueued()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JAVA锁"><span class="nav-number">8.</span> <span class="nav-text">JAVA锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自旋锁"><span class="nav-number">8.1.</span> <span class="nav-text">自旋锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#适应自旋锁"><span class="nav-number">8.2.</span> <span class="nav-text">适应自旋锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁消除"><span class="nav-number">8.3.</span> <span class="nav-text">锁消除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁粗化"><span class="nav-number">8.4.</span> <span class="nav-text">锁粗化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#偏向锁"><span class="nav-number">8.5.</span> <span class="nav-text">偏向锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#轻量级锁"><span class="nav-number">8.6.</span> <span class="nav-text">轻量级锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#轻量级锁的释放"><span class="nav-number">8.6.1.</span> <span class="nav-text">轻量级锁的释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重量级锁"><span class="nav-number">8.7.</span> <span class="nav-text">重量级锁</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thread"><span class="nav-number">9.</span> <span class="nav-text">Thread</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程状态转换"><span class="nav-number">10.</span> <span class="nav-text">线程状态转换</span></a></li></ol></div>
             
 
           </div>
@@ -919,7 +999,7 @@ run2->run3</textarea><textarea id="flowchart-1-options" style="display: none">{"
         <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
 
-<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

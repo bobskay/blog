@@ -126,7 +126,7 @@
 <meta property="og:image" content="http://yoursite.com/blog/images/1534327368197.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1534327377437.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1534327391313.png">
-<meta property="og:updated_time" content="2018-08-15T10:04:35.213Z">
+<meta property="og:updated_time" content="2019-10-05T05:26:10.999Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="分布式事务">
 <meta name="twitter:description" content="事务是保证业务逻辑正确最基本的前提，同时也常常是系统性能的最大的瓶颈，如果用好事务，在保证一致性的前提下，进一步缩短事务时间，一直是一个考验系统设计的重大难题">
@@ -400,7 +400,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-08-15 18:04:35" itemprop="dateModified" datetime="2018-08-15T18:04:35+08:00">2018-08-15</time>
+                <time title="修改时间：2019-10-05 13:26:10" itemprop="dateModified" datetime="2019-10-05T13:26:10+08:00">2019-10-05</time>
               
             
           </span>
@@ -529,7 +529,7 @@
 <h3 id="sql"><a href="#sql" class="headerlink" title="sql"></a>sql</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> <span class="keyword">if</span> <span class="keyword">exists</span> m_account;</span><br><span class="line">#建表</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> m_account</span><br><span class="line">(</span><br><span class="line">   accountId            <span class="built_in">bigint</span> <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'主键'</span>,</span><br><span class="line">   accountName          <span class="built_in">varchar</span>(<span class="number">16</span>) <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'账户名，唯一非空'</span>,</span><br><span class="line">   balance              <span class="built_in">int</span> <span class="keyword">unsigned</span> <span class="keyword">comment</span> <span class="string">'账户余额，必须大于0'</span>,</span><br><span class="line">   primary <span class="keyword">key</span> (accountId)</span><br><span class="line">);</span><br><span class="line">#增加唯一约束</span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> m_account  <span class="keyword">add</span> <span class="keyword">unique</span> <span class="keyword">key</span>(accountName);</span><br><span class="line">#初始化数据</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="string">`m_account`</span>(<span class="string">`accountId`</span>,<span class="string">`accountName`</span>,<span class="string">`balance`</span>)<span class="keyword">values</span>(<span class="number">1</span>,<span class="string">'zhangsan'</span>,<span class="number">100</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="string">`m_account`</span>(<span class="string">`accountId`</span>,<span class="string">`accountName`</span>,<span class="string">`balance`</span>)<span class="keyword">values</span>(<span class="number">2</span>,<span class="string">'lisi'</span>,<span class="number">100</span>);</span><br><span class="line">#查看结果</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> m_account</span><br></pre></td></tr></table></figure>
 <h2 id="基础代码"><a href="#基础代码" class="headerlink" title="基础代码"></a>基础代码</h2><h3 id="model"><a href="#model" class="headerlink" title="model"></a>model</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Account</span>  </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Long accountId;</span><br><span class="line">	<span class="keyword">private</span> Integer balance;</span><br><span class="line">	<span class="keyword">private</span> String accountName;</span><br><span class="line">    <span class="comment">//省略get和set</span></span><br></pre></td></tr></table></figure>
 <h3 id="dao"><a href="#dao" class="headerlink" title="dao"></a>dao</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AccountDao</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 *  修改账户余额</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@param</span> params.accountName 账户名</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@param</span> params.balance 要变动金额，如果为正就增加，为负就减少</span></span><br><span class="line"><span class="comment">	 *  <span class="doctag">@return</span> 影响的条数</span></span><br><span class="line"><span class="comment">	 * */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Integer <span class="title">updateBalanceByName</span><span class="params">(Map&lt;String,Object&gt; params)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="mapper-xml"><a href="#mapper-xml" class="headerlink" title="mapper.xml"></a>mapper.xml</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">"top.luckie.demo.dao.AccountDao"</span> &gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">"updateBalanceByName"</span> <span class="attr">parameterType</span>=<span class="string">"java.util.Map"</span>&gt;</span></span><br><span class="line">  	update m_account set balance=balance+#&#123;amount&#125; where accountName=#&#123;accountName&#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="mapper-xml"><a href="#mapper-xml" class="headerlink" title="mapper.xml"></a>mapper.xml</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">"top.luckie.demo.dao.AccountDao"</span> &gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">"updateBalanceByName"</span> <span class="attr">parameterType</span>=<span class="string">"java.util.Map"</span>&gt;</span></span><br><span class="line">  	update m_account set balance=balance+#&#123;amount&#125; where accountName=#&#123;accountName&#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <h1 id="无事务的情况"><a href="#无事务的情况" class="headerlink" title="无事务的情况"></a>无事务的情况</h1><p>为了模拟出错的情况，先增加李四账户后减少张三账户</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	AccountDao accountDao;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 转账</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> from 减少金额账户名</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> to 增加金额账户名</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> amount 要转金额</span></span><br><span class="line"><span class="comment">	 * */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(String from,String to,Integer amount)</span> </span>&#123;</span><br><span class="line">		<span class="comment">//给李四账户加钱</span></span><br><span class="line">		Map&lt;String,Object&gt; map=<span class="keyword">new</span> HashMap();</span><br><span class="line">		map.put(<span class="string">"accountName"</span>, to);</span><br><span class="line">		map.put(<span class="string">"amount"</span>, amount);</span><br><span class="line">		accountDao.updateBalanceByName(map);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//给账户账户减钱</span></span><br><span class="line">		map=<span class="keyword">new</span> HashMap();</span><br><span class="line">		map.put(<span class="string">"accountName"</span>, from);</span><br><span class="line">		map.put(<span class="string">"amount"</span>, <span class="number">0</span>-amount);</span><br><span class="line">		accountDao.updateBalanceByName(map);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最初两个人账户上都有100</p>
@@ -688,8 +688,8 @@ cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/code/spring/springMVC/develop/springMVC/" rel="next" title="springMVC组件说明">
-                <i class="fa fa-chevron-left"></i> springMVC组件说明
+              <a href="/blog/code/spring/eureka/develop/eureka-unavailable-replicas/" rel="next" title="eureka集群unavailable-replicas问题">
+                <i class="fa fa-chevron-left"></i> eureka集群unavailable-replicas问题
               </a>
             
           </div>
@@ -770,7 +770,7 @@ cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -817,7 +817,23 @@ cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none
                     
                       
                     
-                    <span class="site-state-item-count">17</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -882,7 +898,45 @@ cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">45</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -941,7 +995,7 @@ cond1(no)->op2</textarea><textarea id="flowchart-0-options" style="display: none
         <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
 
-<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

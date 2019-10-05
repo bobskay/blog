@@ -326,7 +326,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/ops/ops/常用快捷键/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/design/singleton/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -345,8 +345,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/ops/ops/常用快捷键/" itemprop="url">
-                  常用快捷键
+                <a class="post-title-link" href="/blog/design/singleton/" itemprop="url">
+                  Singleton的double check问题
                 </a>
               
             
@@ -372,24 +372,12 @@
                 
               
 
-              <time title="创建时间：2018-07-29 19:33:13" itemprop="dateCreated datePublished" datetime="2018-07-29T19:33:13+08:00">2018-07-29</time>
+              <time title="创建时间：2019-01-17 06:24:56 / 修改时间：10:25:39" itemprop="dateCreated datePublished" datetime="2019-01-17T06:24:56+08:00">2019-01-17</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-07-31 19:08:26" itemprop="dateModified" datetime="2018-07-31T19:08:26+08:00">2018-07-31</time>
               
             
           </span>
@@ -406,7 +394,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/ops/" itemprop="url" rel="index"><span itemprop="name">ops</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/design/" itemprop="url" rel="index"><span itemprop="name">design</span></a></span>
 
                 
                 
@@ -420,7 +408,7 @@
 
           
           
-             <span id="/blog/ops/ops/常用快捷键/" class="leancloud_visitors" data-flag-title="常用快捷键">
+             <span id="/blog/design/singleton/" class="leancloud_visitors" data-flag-title="Singleton的double check问题">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -452,10 +440,43 @@
 
       
         
-          <p>一些快捷键，不常用，但想用了又不好查，统计记录一下</p>
+          <p>创建单例对象如果用double check方式，会存在不安全的情况，简单说法是给对象加上volatile关键字，</p>
+<p>具体原因牵扯到比较多，下面具体说明，先看代码</p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><p>创建10个线程，同时调用getInstance()方法获取单例对象</p>
+<p>getInstance方法，创建对象的过程为</p>
+<p>1.判断对象是否为null</p>
+<p>2.获得锁</p>
+<p>3.再次判断对象是否为null</p>
+<p>4.创建对象</p>
+<p>5.初始化对象内部数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line">    <span class="keyword">private</span> String initThreadName;<span class="comment">//记录单例对象是由哪个线程创建的</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;<span class="comment">//1</span></span><br><span class="line">            debug(<span class="string">"singleton不为null,直接返回"</span>);</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">        debug(<span class="string">"singleton为null,准备获得锁"</span>);</span><br><span class="line">        <span class="keyword">synchronized</span> (Singleton.class) &#123;<span class="comment">//2</span></span><br><span class="line">            <span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;<span class="comment">//3</span></span><br><span class="line">                debug(<span class="string">"获得锁后发现singleton已经创建,直接返回"</span>);</span><br><span class="line">                <span class="keyword">return</span> singleton;</span><br><span class="line">            &#125;</span><br><span class="line">            debug(<span class="string">"singleton为null,开始执行创建"</span>);</span><br><span class="line">            singleton = <span class="keyword">new</span> Singleton();<span class="comment">//4</span></span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);<span class="comment">//假装对象创建比较耗时</span></span><br><span class="line">            singleton.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line">            debug(<span class="string">"-----singleton创建完毕-------"</span>);</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//创建10个线程,同时调用getInstance()</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        List&lt;Thread&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        CountDownLatch c = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            Runnable run = () -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    debug(<span class="string">"线程创建完毕等待执行"</span>);</span><br><span class="line">                    c.await();<span class="comment">//等待线程全部到达</span></span><br><span class="line">                    debug(<span class="string">"准备获取对象"</span>);</span><br><span class="line">                    Singleton singleton = Singleton.getInstance();</span><br><span class="line">                    debug(<span class="string">"获得单例对象,该对象是由线程"</span> + singleton.initThreadName + <span class="string">"创建的"</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="keyword">new</span> Thread(run, <span class="string">"thread"</span> + i).start();</span><br><span class="line">        &#125;</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        c.countDown();</span><br><span class="line">        Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">        Singleton.getInstance();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">long</span> start = System.currentTimeMillis();<span class="comment">//记录启动时间</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">debug</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.println(System.currentTimeMillis() - start + <span class="string">"|"</span> + Thread.currentThread().getName() + <span class="string">":"</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="执行日志"><a href="#执行日志" class="headerlink" title="执行日志"></a>执行日志</h1><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">48</span>|thread0:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread2:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread1:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread3:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread4:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread5:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread6:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread9:线程创建完毕等待执行</span><br><span class="line"><span class="number">49</span>|thread7:线程创建完毕等待执行</span><br><span class="line"><span class="number">49</span>|thread8:线程创建完毕等待执行</span><br><span class="line"><span class="number">149</span>|thread0:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread1:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread5:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread9:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread9:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread9:singleton为null,开始执行创建</span><br><span class="line"><span class="number">149</span>|thread2:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread2:singleton不为null,直接返回</span><br><span class="line"><span class="number">149</span>|thread2:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread8:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread7:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread5:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread6:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread6:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread6:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread1:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread4:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread4:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread4:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread0:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread3:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread3:singleton不为null,直接返回</span><br><span class="line"><span class="number">149</span>|thread7:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread7:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread8:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread3:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">150</span>|thread8:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">2150</span>|thread9:-----singleton创建完毕-------</span><br><span class="line"><span class="number">2150</span>|thread9:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread0:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread0:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread1:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread1:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread5:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread5:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">5150</span>|main:singleton不为null,直接返回</span><br><span class="line"><span class="number">5162</span>|main:获得单例对象,该对象是由线程thread9创建的</span><br></pre></td></tr></table></figure>
+<h1 id="实际执行过程"><a href="#实际执行过程" class="headerlink" title="实际执行过程"></a>实际执行过程</h1><h2 id="第一批线程"><a href="#第一批线程" class="headerlink" title="第一批线程"></a>第一批线程</h2><p>thread9获得锁，执行到第4步后开始等待</p>
+<h2 id="第二批线程"><a href="#第二批线程" class="headerlink" title="第二批线程"></a>第二批线程</h2><p>thread2，thread6，thread4，thread3，thread7，thread8执行到第1步发现对象不为null，就直接返回了，但这时候initThreadName属性还没赋值，所以拿到对象后打印出来的信息为</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">singleton不为null,直接返回</span><br><span class="line">获得单例对象,该对象是由线程null创建的</span><br></pre></td></tr></table></figure>
+<h2 id="第三批线程"><a href="#第三批线程" class="headerlink" title="第三批线程"></a>第三批线程</h2><p>thread0,thread1,thread5执行到第2步后开始等待，等到thread9释放锁后在第3步返回，因此他们得到的信息是正确的</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">获得锁后发现singleton已经创建,直接返回</span><br><span class="line">获得单例对象,该对象是由线程thread9创建的</span><br></pre></td></tr></table></figure>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>第二批线程获取对象的时候，虽然singleton不为null，但里面的属性还未赋值，所以拿到对象后立即操作就会出现问题，如前所述发现initThreadName是null</p>
+<h1 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h1><p>创建一个临时对象，先初始化完毕后再赋值给singleton，简单来说就是讲4，5两步对调</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//原代码</span></span><br><span class="line">singleton = <span class="keyword">new</span> Singleton();<span class="comment">//4</span></span><br><span class="line">singleton.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//新代码</span></span><br><span class="line">Singleton temp= <span class="keyword">new</span> Singleton();</span><br><span class="line">temp.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line">singleton=temp;<span class="comment">//4</span></span><br></pre></td></tr></table></figure>
+<p>通常来说，大部分情况下是没问题的，但理论上不是这样，写线程和读线程看到的singleton对象，对于计算机来说不是同一个</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//写线程，在写线程的工作内存为singleton赋值后，需要将这份数据赋值到主内存</span></span><br><span class="line">singleton=temp;</span><br><span class="line"><span class="comment">//读线程，需要将主内存的数据复制到当前工作线程，然后才能判断数据是否为null</span></span><br><span class="line"><span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;</span><br></pre></td></tr></table></figure>
+<p>这里牵扯到java内存模型的问题，java线程是不能直接操作主内存的，每个线程都只能修改自己工作内存，然后将值复制到主内存</p>
+<p><img src="/blog/images/20160127101418421" alt="这里写图片描述"></p>
+<p>singleton=temp虽然只有一句，但需要在2个地方写数据，再加上写操作本身就需要store和write</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">JAVA内存模型规定工作内存与主内存之间的交互协议，其中包括8种原子操作：</span><br><span class="line">1）lock(锁定)：将一个变量标识为被一个线程独占状态。</span><br><span class="line">2）unlock(解锁)：将一个变量从独占状态释放出来，释放后的变量才可以被其他线程锁定。</span><br><span class="line">3）read(读取)：将一个变量的值从主内存传输到工作内存中，以便随后的load操作。</span><br><span class="line">4）load(载入)：把read操作从主内存中得到的变量值放入工作内存的变量的副本中。</span><br><span class="line">5）use(使用)：把工作内存中的一个变量的值传给执行引擎，每当虚拟机遇到一个使用到变量的指令时都会使用该指令。</span><br><span class="line">6）assign(赋值)：把一个从执行引擎接收到的值赋给工作内存中的变量，每当虚拟机遇到一个给变量赋值的指令时，都要使用该操作。</span><br><span class="line">7）store(存储)：把工作内存中的一个变量的值传递给主内存，以便随后的write操作。</span><br><span class="line">8）write(写入)：把store操作从工作内存中得到的变量的值写到主内存中的变量</span><br></pre></td></tr></table></figure>
+<p>简单来说，多线程环境下，一个线程修改了singleton的信息，另一个线程并不能马上知道完整信息，理论上虽然</p>
+<p>if (singleton != null) 判断为true，但线程所获得的singleton 仍然有可能是不完整的</p>
+<h2 id="Volatile测试"><a href="#Volatile测试" class="headerlink" title="Volatile测试"></a>Volatile测试</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileTest</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span>  <span class="keyword">int</span> value = <span class="number">0</span>;<span class="comment">//不加volatile关键字,监听线程是感知不到value值变化的</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable change=()-&gt;&#123;</span><br><span class="line">            <span class="keyword">try</span>&#123;</span><br><span class="line">                <span class="keyword">while</span> (value&lt;<span class="number">5</span>)&#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    value++;</span><br><span class="line">                    System.out.println(<span class="string">"修改线程将value修改为:"</span>+value);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception ex)&#123;</span><br><span class="line">                ex.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Runnable chanListener=()-&gt;&#123;</span><br><span class="line">            <span class="keyword">int</span> local=value;</span><br><span class="line">            <span class="keyword">while</span> (value &lt; <span class="number">5</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span>(local!=value)&#123;</span><br><span class="line">                    System.out.println(<span class="string">"监听线程发现value已经改变:"</span> +value+<span class="string">"!="</span>+local);</span><br><span class="line">                    local = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">new</span> Thread(chanListener,<span class="string">"chanListener"</span>).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(change,<span class="string">"change"</span>).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以使用double check方式生成单例需要注意</p>
+<p>1.singleton所有初始化工作需要在赋值之前</p>
+<p>2.singleton变量需要加上volatile关键字</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;<span class="comment">//变量设置为volatile</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	...</span><br><span class="line">        Singleton temp= <span class="keyword">new</span> Singleton();</span><br><span class="line">        <span class="comment">//初始化所需的其它字段</span></span><br><span class="line">        ...</span><br><span class="line">        singleton=temp;<span class="comment">//将完整对象赋值给singleton</span></span><br><span class="line">    &#125;         </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然创建单例的方式有很多种，实际工作中可以用恶汉模式，或者内部类方式，通过内部类方式实现代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread.innerclass;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String initThreadName;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHandler</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = init();</span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Singleton <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"初始化singleton"</span>);</span><br><span class="line">            Singleton singleton= <span class="keyword">new</span> Singleton();</span><br><span class="line">            singleton.initThreadName=Thread.currentThread().getName();</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingletonHandler.singleton;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        debug(<span class="string">"只执行静态方法是不会加载对象的"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;Thread&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        CountDownLatch c = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            Runnable run = () -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    debug(<span class="string">"线程创建完毕等待执行"</span>);</span><br><span class="line">                    c.await();<span class="comment">//等待线程全部到达</span></span><br><span class="line">                    debug(<span class="string">"准备获取对象"</span>);</span><br><span class="line">                    Singleton singleton = getInstance();</span><br><span class="line">                    debug(<span class="string">"获得单例对象,该对象是由线程"</span> + singleton.initThreadName + <span class="string">"创建的"</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="keyword">new</span> Thread(run, <span class="string">"thread"</span> + i).start();</span><br><span class="line">        &#125;</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        c.countDown();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">long</span> start = System.currentTimeMillis();<span class="comment">//记录启动时间</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">debug</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.println(System.currentTimeMillis() - start + <span class="string">"|"</span> + Thread.currentThread().getName() + <span class="string">":"</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/ops/ops/常用快捷键/#more" rel="contents">
+            <a class="btn" href="/blog/design/singleton/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -511,7 +532,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/spring/springClould/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/elasticseach/elasticseach/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -530,8 +551,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/code/spring/springClould/" itemprop="url">
-                  springcloud
+                <a class="post-title-link" href="/blog/elasticseach/elasticseach/" itemprop="url">
+                  未命名
                 </a>
               
             
@@ -557,7 +578,7 @@
                 
               
 
-              <time title="创建时间：2018-07-30 18:01:30" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
+              <time title="创建时间：2019-01-11 07:18:01" itemprop="dateCreated datePublished" datetime="2019-01-11T07:18:01+08:00">2019-01-11</time>
             
 
             
@@ -574,7 +595,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-07-31 19:06:46" itemprop="dateModified" datetime="2018-07-31T19:06:46+08:00">2018-07-31</time>
+                <time title="修改时间：2019-01-17 06:25:18" itemprop="dateModified" datetime="2019-01-17T06:25:18+08:00">2019-01-17</time>
               
             
           </span>
@@ -591,14 +612,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/elasticseach/" itemprop="url" rel="index"><span itemprop="name">elasticseach</span></a></span>
 
                 
                 
@@ -612,7 +626,7 @@
 
           
           
-             <span id="/blog/code/spring/springClould/" class="leancloud_visitors" data-flag-title="springcloud">
+             <span id="/blog/elasticseach/elasticseach/" class="leancloud_visitors" data-flag-title="">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -644,10 +658,50 @@
 
       
         
-          <p>通过springcloud实现微服务，包括spring-config-server，eureka，hystrix，feign</p>
+          <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><p><a href="https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.0.zip" target="_blank" rel="noopener">https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.0.zip</a></p>
+<p>修改配置</p>
+<p>config/elasticsearch.yml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">http.cors.enabled:</span> <span class="literal">true</span> </span><br><span class="line"><span class="string">http.cors.allow-origin:</span> <span class="string">"*"</span></span><br><span class="line"><span class="string">node.master:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">node.data:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="string">cluster.name:</span> <span class="string">my-application</span></span><br><span class="line"><span class="string">node.name:</span> <span class="string">node-1</span></span><br></pre></td></tr></table></figure>
+<h2 id="中文分词器"><a href="#中文分词器" class="headerlink" title="中文分词器"></a>中文分词器</h2><p><a href="https://codeload.github.com/medcl/elasticsearch-analysis-ik/zip/master" target="_blank" rel="noopener">https://codeload.github.com/medcl/elasticsearch-analysis-ik/zip/master</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">E:\soft\elasticseach\elasticsearch-6.3.0\bin&gt;elasticsearch-plugin.bat install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.3.0/elasticsearch-analysis-ik-6.3.0.zip</span><br></pre></td></tr></table></figure>
+<p>测试</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GET _analyze?pretty</span><br><span class="line">&#123;</span><br><span class="line">  "analyzer": "ik_smart",</span><br><span class="line">  "text": "中华人民共和国国歌"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="elasticsearch-head"><a href="#elasticsearch-head" class="headerlink" title="elasticsearch-head"></a>elasticsearch-head</h2><p><a href="https://codeload.github.com/mobz/elasticsearch-head/zip/v5.0.0" target="_blank" rel="noopener">https://codeload.github.com/mobz/elasticsearch-head/zip/v5.0.0</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd E:\soft\elasticseach\elasticsearch-head-5.0.0</span><br><span class="line">npm install -g grunt-cli</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+<h1 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h1><h2 id="elasticsearch-1"><a href="#elasticsearch-1" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">e:</span><br><span class="line">cd E:\soft\elasticseach\elasticsearch-6.3.0\bin</span><br><span class="line">elasticsearch.bat</span><br></pre></td></tr></table></figure>
+<p><a href="http://127.0.0.1:9200/" target="_blank" rel="noopener">http://127.0.0.1:9200/</a></p>
+<h2 id="kibana"><a href="#kibana" class="headerlink" title="kibana"></a>kibana</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">e:</span><br><span class="line">cd E:\soft\elasticseach\kibana-6.2.4-windows-x86_64\bin</span><br><span class="line">kibana.bat</span><br></pre></td></tr></table></figure>
+<p><a href="http://127.0.0.1:5601" target="_blank" rel="noopener">http://127.0.0.1:5601</a></p>
+<h2 id="elasticsearch-head-1"><a href="#elasticsearch-head-1" class="headerlink" title="elasticsearch-head"></a>elasticsearch-head</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd E:\soft\elasticseach\elasticsearch-head-5.0.0\</span><br><span class="line">grunt server</span><br></pre></td></tr></table></figure>
+<p><a href="http://127.0.0.1:9100/" target="_blank" rel="noopener">http://127.0.0.1:9100/</a></p>
+<h1 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h1><h2 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET _cat/health?v</span><br></pre></td></tr></table></figure>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">epoch      timestamp cluster       status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent</span><br><span class="line">1547428524 01:15:24  elasticsearch green           1         1      0   0    0    0        0             0                  -                100.0<span class="comment">%</span></span><br></pre></td></tr></table></figure>
+<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><h3 id="设置mapping"><a href="#设置mapping" class="headerlink" title="设置mapping"></a>设置mapping</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">PUT store</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"mappings"</span>:&#123;</span><br><span class="line">    <span class="attr">"book"</span>: &#123;</span><br><span class="line">       <span class="attr">"properties"</span>: &#123;</span><br><span class="line">          <span class="attr">"bookId"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"long"</span>&#125;,</span><br><span class="line">          <span class="attr">"bookName"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">          <span class="attr">"publishDate"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"date"</span>,</span><br><span class="line">			<span class="attr">"format"</span>: <span class="string">"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"description"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">			<span class="attr">"analyzer"</span>: <span class="string">"ik_max_word"</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">		  <span class="attr">"isbn"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">		  <span class="attr">"tags"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>:<span class="string">"keyword"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"price"</span>:&#123;<span class="attr">"type"</span>:<span class="string">"long"</span>&#125;</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="新增数据"><a href="#新增数据" class="headerlink" title="新增数据"></a>新增数据</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">PUT /store/book/1</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">1</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"深入理解虚拟机"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价100的java图书,包含虚拟机"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">100</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>,<span class="string">"虚拟机"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PUT /store/book/2</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">2</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"java最佳实践"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价200的java图书"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">200</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PUT /store/book/3</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">2</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"设计模式与java"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价300的java图书,关于设计模式的"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">200</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>,<span class="string">"设计模式"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="删"><a href="#删" class="headerlink" title="删"></a>删</h2><h2 id="改"><a href="#改" class="headerlink" title="改"></a>改</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">POST /store/book/1/_update</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"doc"</span>: </span><br><span class="line">  &#123;</span><br><span class="line">	  <span class="attr">"description"</span>:<span class="string">"更新后的描述信息"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><h3 id="查询全部"><a href="#查询全部" class="headerlink" title="查询全部"></a>查询全部</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;<span class="attr">"match_all"</span>:&#123;&#125;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="按字段匹配，排序"><a href="#按字段匹配，排序" class="headerlink" title="按字段匹配，排序"></a>按字段匹配，排序</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  "query": </span><br><span class="line">  &#123;</span><br><span class="line">    "match": </span><br><span class="line">    &#123;</span><br><span class="line">      "tags": "java"</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">  &#125;,</span><br><span class="line">  "sort": [</span><br><span class="line">    &#123;</span><br><span class="line">      "price": &#123;</span><br><span class="line">        "order": "desc"</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="多条件"><a href="#多条件" class="headerlink" title="多条件"></a>多条件</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"bool"</span>: &#123;</span><br><span class="line">      <span class="attr">"must"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"match"</span>: &#123;</span><br><span class="line">          <span class="attr">"tags"</span>: <span class="string">"java"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"filter"</span>: &#123;</span><br><span class="line">        <span class="attr">"range"</span>: &#123;</span><br><span class="line">          <span class="attr">"price"</span>: &#123;</span><br><span class="line">            <span class="attr">"gte"</span>: <span class="number">100</span>,</span><br><span class="line">            <span class="attr">"lte"</span>: <span class="number">500</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>from,size 相当于 mysql的limit</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;<span class="attr">"match_all"</span>:&#123;&#125;&#125;,</span><br><span class="line">  <span class="attr">"from"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="查询部分字段"><a href="#查询部分字段" class="headerlink" title="查询部分字段"></a>查询部分字段</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;<span class="attr">"match_all"</span>:&#123;&#125;&#125;,</span><br><span class="line">  <span class="attr">"_source"</span>: [<span class="string">"bookId"</span>,<span class="string">"bookName"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="全文检索"><a href="#全文检索" class="headerlink" title="全文检索"></a>全文检索</h3><p>描述包含”售价 设计模式”排最前面</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"match"</span>: &#123;</span><br><span class="line">      <span class="attr">"description"</span>: <span class="string">"售价 设计模式"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="高亮"><a href="#高亮" class="headerlink" title="高亮"></a>高亮</h3><p>高亮描述字段</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"query"</span>: &#123;</span><br><span class="line">    <span class="attr">"match"</span>: &#123;</span><br><span class="line">      <span class="attr">"description"</span>: <span class="string">"售价 虚拟机"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"highlight"</span>: &#123;</span><br><span class="line">    <span class="attr">"fields"</span>: &#123;</span><br><span class="line">      <span class="attr">"description"</span>: &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="统计"><a href="#统计" class="headerlink" title="统计"></a>统计</h2><h3 id="修改字段属性为可以统计"><a href="#修改字段属性为可以统计" class="headerlink" title="修改字段属性为可以统计"></a>修改字段属性为可以统计</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PUT /store/_mapping/book</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"properties"</span>: &#123;</span><br><span class="line">    <span class="attr">"tags"</span>:&#123;</span><br><span class="line">      <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">      <span class="attr">"fielddata"</span>: <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="groupby"><a href="#groupby" class="headerlink" title="groupby"></a>groupby</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> tags, <span class="keyword">count</span>(*) <span class="keyword">from</span> book <span class="keyword">group</span> <span class="keyword">by</span> tags</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">    <span class="attr">"mygroup"</span>: &#123;</span><br><span class="line">      <span class="attr">"terms"</span>: &#123;</span><br><span class="line">        <span class="attr">"field"</span>: <span class="string">"tags"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="avg"><a href="#avg" class="headerlink" title="avg"></a>avg</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> tags,<span class="keyword">count</span>(*),<span class="keyword">avg</span>(price) <span class="keyword">from</span> book <span class="keyword">group</span> <span class="keyword">by</span> tags</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">    <span class="attr">"groupbytags"</span>: &#123;</span><br><span class="line">      <span class="attr">"terms"</span>: &#123;</span><br><span class="line">        <span class="attr">"field"</span>: <span class="string">"tags"</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"avgprice"</span>: &#123;</span><br><span class="line">          <span class="attr">"avg"</span>: &#123;</span><br><span class="line">            <span class="attr">"field"</span>: <span class="string">"price"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="orderby"><a href="#orderby" class="headerlink" title="orderby"></a>orderby</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> tags,<span class="keyword">count</span>(*),<span class="keyword">avg</span>(price) avgprice pp <span class="keyword">from</span> book <span class="keyword">group</span> <span class="keyword">by</span> tags <span class="keyword">order</span> <span class="keyword">by</span> avgprice</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">    <span class="attr">"groupbytags"</span>: &#123;</span><br><span class="line">      <span class="attr">"terms"</span>: &#123;</span><br><span class="line">        <span class="attr">"field"</span>: <span class="string">"tags"</span>,</span><br><span class="line">        <span class="attr">"order"</span>: &#123;</span><br><span class="line">          <span class="attr">"avgprice"</span>: <span class="string">"asc"</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"avgprice"</span>: &#123;</span><br><span class="line">          <span class="attr">"avg"</span>: &#123;</span><br><span class="line">            <span class="attr">"field"</span>: <span class="string">"price"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="case"><a href="#case" class="headerlink" title="case"></a>case</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">count</span>(<span class="keyword">case</span> <span class="keyword">when</span> price&gt;=<span class="number">0</span> <span class="keyword">and</span> preie&lt;<span class="number">100</span> <span class="keyword">then</span> tags,</span><br><span class="line">             <span class="keyword">case</span> <span class="keyword">when</span> price&gt;=<span class="number">100</span> <span class="keyword">and</span> preie&lt;<span class="number">200</span> <span class="keyword">then</span> tags</span><br><span class="line">            ) <span class="keyword">from</span> book</span><br></pre></td></tr></table></figure>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">    <span class="attr">"statprice"</span>: &#123;</span><br><span class="line">      <span class="attr">"range"</span>: &#123;</span><br><span class="line">        <span class="attr">"field"</span>: <span class="string">"price"</span>,</span><br><span class="line">        <span class="attr">"ranges"</span>: [</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"from"</span>:<span class="number">0</span>,</span><br><span class="line">            <span class="attr">"to"</span>: <span class="number">100</span></span><br><span class="line">          &#125;,</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"from"</span>:<span class="number">100</span>,</span><br><span class="line">            <span class="attr">"to"</span>: <span class="number">200</span></span><br><span class="line">          &#125;,</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"from"</span>:<span class="number">200</span>,</span><br><span class="line">            <span class="attr">"to"</span>: <span class="number">300</span></span><br><span class="line">          &#125;</span><br><span class="line">        ]</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">"aggs"</span>: &#123;</span><br><span class="line">        <span class="attr">"groupbytags"</span>: &#123;</span><br><span class="line">          <span class="attr">"terms"</span>: &#123;</span><br><span class="line">            <span class="attr">"field"</span>: <span class="string">"tags"</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"size"</span>: <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/code/spring/springClould/#more" rel="contents">
+            <a class="btn" href="/blog/elasticseach/elasticseach/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -703,7 +757,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/java/jvm/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/http/https/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -722,8 +776,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/code/java/jvm/" itemprop="url">
-                  jvm
+                <a class="post-title-link" href="/blog/http/https/" itemprop="url">
+                  未命名
                 </a>
               
             
@@ -749,7 +803,192 @@
                 
               
 
-              <time title="创建时间：2018-07-30 18:01:30" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
+              <time title="创建时间：2019-01-09 22:30:27 / 修改时间：22:33:36" itemprop="dateCreated datePublished" datetime="2019-01-09T22:30:27+08:00">2019-01-09</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/http/" itemprop="url" rel="index"><span itemprop="name">http</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/http/https/" class="leancloud_visitors" data-flag-title="">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>转自 <a href="https://blog.csdn.net/xiaopang_yan/article/details/78709574" target="_blank" rel="noopener">https://blog.csdn.net/xiaopang_yan/article/details/78709574</a></p>
+<p>https流程</p>
+<p><strong>step1</strong>： “客户”向服务端发送一个通信请求</p>
+<p><strong>step2</strong>： “服务器”向客户发送自己的数字证书。证书中有一个公钥用来加密信息，私钥由“服务器”持有</p>
+<p>“服务器”-&gt;“客户”：你好，我是服务器，这里是我的数字证书 </p>
+<p><strong>step3</strong>： “客户”收到“服务器”的证书后，它会去验证这个数字证书到底是不是“服务器”的，数字证书有没有什么问题，数字证书如果检查没有问题，就说明数字证书中的公钥确实是“服务器”的。检查数字证书后，“客户”会发送一个随机的字符串给“服务器”用私钥去加密，服务器把加密的结果返回给“客户”，“客户”用公钥解密这个返回结果，如果解密结果与之前生成的随机字符串一致，那说明对方确实是私钥的持有者，或者说对方确实是“服务器”。</p>
+<p>“客户”-&gt;“服务器”：向我证明你就是服务器，这是一个随机字符串     //前面的例子中为了方便解释，用的是“你好”等内容，实际情况下一般是随机生成的一个字符串。</p>
+<p>“服务器”-&gt;“客户”：{一个随机字符串}[私钥|RSA]</p>
+<p><strong>step4</strong>： 验证“服务器”的身份后，“客户”生成一个对称加密算法和密钥，用于后面的通信的加密和解密。这个对称加密算法和密钥，“客户”会用公钥加密后发送给“服务器”，别人截获了也没用，因为只有“服务器”手中有可以解密的私钥。这样，后面“服务器”和“客户”就都可以用对称加密算法来加密和解密通信内容了。</p>
+<p>“服务器”-&gt;“客户”：{OK，已经收到你发来的对称加密算法和密钥！有什么可以帮到你的？}[密钥|对称加密算法]</p>
+<p>“客户”-&gt;“服务器”：{我的帐号是aaa，密码是123，把我的余额的信息发给我看看}[密钥|对称加密算法]</p>
+<p>“服务器”-&gt;“客户”：{你好，你的余额是100元}[密钥|对称加密算法]</p>
+<p>…… //继续其它的通信</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/http/https/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/tools/wireshark/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/tools/wireshark/" itemprop="url">
+                  未命名
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-05 18:11:01" itemprop="dateCreated datePublished" datetime="2019-01-05T18:11:01+08:00">2019-01-05</time>
             
 
             
@@ -766,7 +1005,194 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-07-31 16:14:58" itemprop="dateModified" datetime="2018-07-31T16:14:58+08:00">2018-07-31</time>
+                <time title="修改时间：2019-01-09 22:29:49" itemprop="dateModified" datetime="2019-01-09T22:29:49+08:00">2019-01-09</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/tools/" itemprop="url" rel="index"><span itemprop="name">tools</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/tools/wireshark/" class="leancloud_visitors" data-flag-title="">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>乱码</p>
+<p>发现https乱码，可能是压缩问题，将压缩形式改为none</p>
+<p><img src="/blog/images/1547039657258.png" alt="1547039617007"></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/tools/wireshark/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/java/develop/数据结构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/code/java/develop/数据结构/" itemprop="url">
+                  java数据结构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-27 17:27:11" itemprop="dateCreated datePublished" datetime="2018-07-27T17:27:11+08:00">2018-07-27</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-01-06 18:36:02" itemprop="dateModified" datetime="2019-01-06T18:36:02+08:00">2019-01-06</time>
               
             
           </span>
@@ -804,7 +1230,7 @@
 
           
           
-             <span id="/blog/code/java/jvm/" class="leancloud_visitors" data-flag-title="jvm">
+             <span id="/blog/code/java/develop/数据结构/" class="leancloud_visitors" data-flag-title="java数据结构">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -836,10 +1262,468 @@
 
       
         
-          <p>jvm内存模型</p>
+          <p>java.util包下经常使用到的类，先写个目录，后续补充</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/code/java/jvm/#more" rel="contents">
+            <a class="btn" href="/blog/code/java/develop/数据结构/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/java/jdkvision/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/java/jdkvision/" itemprop="url">
+                  jdk各个版本日期
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-04 11:09:48 / 修改时间：11:15:41" itemprop="dateCreated datePublished" datetime="2019-01-04T11:09:48+08:00">2019-01-04</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/java/jdkvision/" class="leancloud_visitors" data-flag-title="jdk各个版本日期">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <table>
+<thead>
+<tr>
+<th>版本</th>
+<th>名称</th>
+<th>发行日期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 1.1.4</td>
+<td>Sparkler（宝石）</td>
+<td>1997-09-12</td>
+</tr>
+<tr>
+<td>JDK 1.1.5</td>
+<td>Pumpkin（南瓜）</td>
+<td>1997-12-13</td>
+</tr>
+<tr>
+<td>JDK 1.1.6</td>
+<td>Abigail（阿比盖尔–女子名）</td>
+<td>1998-04-24</td>
+</tr>
+<tr>
+<td>JDK 1.1.7</td>
+<td>Brutus（布鲁图–古罗马政治家和将军）</td>
+<td>1998-09-28</td>
+</tr>
+<tr>
+<td>JDK 1.1.8</td>
+<td>Chelsea（切尔西–城市名）</td>
+<td>1999-04-08</td>
+</tr>
+<tr>
+<td>J2SE 1.2</td>
+<td>Playground（运动场）</td>
+<td>1998-12-04</td>
+</tr>
+<tr>
+<td>J2SE 1.2.1</td>
+<td>none（无）</td>
+<td>1999-03-30</td>
+</tr>
+<tr>
+<td>J2SE 1.2.2</td>
+<td>Cricket（蟋蟀）</td>
+<td>1999-07-08</td>
+</tr>
+<tr>
+<td>J2SE 1.3</td>
+<td>Kestrel（美洲红隼）</td>
+<td>2000-05-08</td>
+</tr>
+<tr>
+<td>J2SE 1.3.1</td>
+<td>Ladybird（瓢虫）</td>
+<td>2001-05-17</td>
+</tr>
+<tr>
+<td>J2SE 1.4.0</td>
+<td>Merlin（灰背隼）</td>
+<td>2002-02-13</td>
+</tr>
+<tr>
+<td>J2SE 1.4.1</td>
+<td>grasshopper（蚱蜢）</td>
+<td>2002-09-16</td>
+</tr>
+<tr>
+<td>J2SE 1.4.2</td>
+<td>Mantis（螳螂）</td>
+<td>2003-06-26</td>
+</tr>
+<tr>
+<td>Java SE 5.0 (1.5.0)</td>
+<td>Tiger（老虎）</td>
+<td>2004-09-30</td>
+</tr>
+<tr>
+<td>Java SE 6.0 (1.6.0)</td>
+<td>Mustang（野马）</td>
+<td>2006-04</td>
+</tr>
+<tr>
+<td>Java SE 7.0 (1.7.0)</td>
+<td>Dolphin（海豚）</td>
+<td>2011-07-28</td>
+</tr>
+<tr>
+<td>Java SE 8.0 (1.8.0)</td>
+<td>Spider（蜘蛛）</td>
+<td>2014-03-18</td>
+</tr>
+<tr>
+<td>Java SE 9.0</td>
+<td></td>
+<td>2017-09-21</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/java/jdkvision/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/docker/docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/docker/docker/" itemprop="url">
+                  docker
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-08-22 07:07:08" itemprop="dateCreated datePublished" datetime="2018-08-22T07:07:08+08:00">2018-08-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-08-30 07:51:19" itemprop="dateModified" datetime="2018-08-30T07:51:19+08:00">2018-08-30</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/docker/" itemprop="url" rel="index"><span itemprop="name">docker</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/docker/docker/" class="leancloud_visitors" data-flag-title="docker">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>docker</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/docker/docker/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -958,7 +1842,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-07-30 23:08:59" itemprop="dateModified" datetime="2018-07-30T23:08:59+08:00">2018-07-30</time>
+                <time title="修改时间：2018-08-27 08:21:12" itemprop="dateModified" datetime="2018-08-27T08:21:12+08:00">2018-08-27</time>
               
             
           </span>
@@ -1088,7 +1972,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/数据库/mysql/database/centos7安装mysql/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/uncategorized/hbase/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1107,8 +1991,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/数据库/mysql/database/centos7安装mysql/" itemprop="url">
-                  centos7下安装mysql
+                <a class="post-title-link" href="/blog/uncategorized/hbase/" itemprop="url">
+                  hbase
                 </a>
               
             
@@ -1134,54 +2018,17 @@
                 
               
 
-              <time title="创建时间：2018-07-29 18:10:28" itemprop="dateCreated datePublished" datetime="2018-07-29T18:10:28+08:00">2018-07-29</time>
+              <time title="创建时间：2018-08-22 07:40:26 / 修改时间：22:40:05" itemprop="dateCreated datePublished" datetime="2018-08-22T07:40:26+08:00">2018-08-22</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-07-30 23:06:05" itemprop="dateModified" datetime="2018-07-30T23:06:05+08:00">2018-07-30</time>
               
             
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/数据库/" itemprop="url" rel="index"><span itemprop="name">数据库</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/数据库/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a></span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -1189,7 +2036,7 @@
 
           
           
-             <span id="/blog/数据库/mysql/database/centos7安装mysql/" class="leancloud_visitors" data-flag-title="centos7下安装mysql">
+             <span id="/blog/uncategorized/hbase/" class="leancloud_visitors" data-flag-title="hbase">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1221,11 +2068,10 @@
 
       
         
-          <p>coentos7安装mysql</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm</span><br><span class="line">rpm -ivh mysql-community-release-el7-5.noarch.rpm</span><br><span class="line">yum -y install mysql-server</span><br><span class="line">systemctl start mysqld.service</span><br><span class="line">mysql -u root</span><br><span class="line">grant all privileges on *.* to ming@'%' identified by 'ming';</span><br></pre></td></tr></table></figure>
+          <p>hbase 基本命令</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/数据库/mysql/database/centos7安装mysql/#more" rel="contents">
+            <a class="btn" href="/blog/uncategorized/hbase/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1281,7 +2127,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/springboot/springboot/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/uncategorized/rocketmq个人定制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1300,8 +2146,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/code/springboot/springboot/" itemprop="url">
-                  springboot初探
+                <a class="post-title-link" href="/blog/uncategorized/rocketmq个人定制/" itemprop="url">
+                  rocketmq个人定制
                 </a>
               
             
@@ -1327,7 +2173,7 @@
                 
               
 
-              <time title="创建时间：2018-07-30 18:01:30 / 修改时间：21:38:46" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
+              <time title="创建时间：2018-08-15 11:15:56 / 修改时间：17:43:50" itemprop="dateCreated datePublished" datetime="2018-08-15T11:15:56+08:00">2018-08-15</time>
             
 
             
@@ -1338,31 +2184,6 @@
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/springboot/" itemprop="url" rel="index"><span itemprop="name">springboot</span></a></span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -1370,7 +2191,7 @@
 
           
           
-             <span id="/blog/code/springboot/springboot/" class="leancloud_visitors" data-flag-title="springboot初探">
+             <span id="/blog/uncategorized/rocketmq个人定制/" class="leancloud_visitors" data-flag-title="rocketmq个人定制">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1402,741 +2223,11 @@
 
       
         
-          <p>草稿</p>
+          <p>由于网络和性能因素，rocketmq对于重复消费，顺序消费，以及事务消息的解决方案，就是不解决。</p>
+<p>客户端根据自身业务情况，需要在一致性和可用性之间做出取舍，自己给出方案</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/code/springboot/springboot/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/design/微服务接口设计/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/design/微服务接口设计/" itemprop="url">
-                  微服务接口设计
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-07-30 18:01:30 / 修改时间：21:21:09" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/design/" itemprop="url" rel="index"><span itemprop="name">design</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/design/微服务接口设计/" class="leancloud_visitors" data-flag-title="微服务接口设计">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>微服务架构下，为了保证系统的高可用，服务通常会设计成集群的方式，当客户端调用其中一个服务端失败时，通常会自动找其他机器进行重试。但由于网络间通信存在超时问题，有可能存在客户端返回失败，但服务端已成功的情况，这就存出现了重复调用的问题。</p>
-<p>所以为了保证业务逻辑的正确性，系统间的接口最好保证幂等，这里给出的方案是给每一个请求都绑定一个requestId的方式，保证一个请求在全局是唯一性</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/design/微服务接口设计/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/java/类加载器/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/code/java/类加载器/" itemprop="url">
-                  类加载器
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-07-30 18:01:30 / 修改时间：21:04:15" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/code/java/类加载器/" class="leancloud_visitors" data-flag-title="类加载器">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>简述java的类加载器和类加载过程</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/code/java/类加载器/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/ops/小问题/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/code/ops/小问题/" itemprop="url">
-                  小问题
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-07-27 17:27:11" itemprop="dateCreated datePublished" datetime="2018-07-27T17:27:11+08:00">2018-07-27</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-07-30 16:30:03" itemprop="dateModified" datetime="2018-07-30T16:30:03+08:00">2018-07-30</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/code/ops/小问题/" class="leancloud_visitors" data-flag-title="小问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>记录一些日常开发遇到的问题，每次上网搜索处理完后，就到这里记录一下，免得忘记了，又得搜</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/code/ops/小问题/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/java/develop/数据结构/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/code/java/develop/数据结构/" itemprop="url">
-                  java数据结构
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-07-27 17:27:11" itemprop="dateCreated datePublished" datetime="2018-07-27T17:27:11+08:00">2018-07-27</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-07-30 15:41:53" itemprop="dateModified" datetime="2018-07-30T15:41:53+08:00">2018-07-30</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/code/java/develop/数据结构/" class="leancloud_visitors" data-flag-title="java数据结构">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>java.util包下经常使用到的类，先写个目录，后续补充</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/code/java/develop/数据结构/#more" rel="contents">
+            <a class="btn" href="/blog/uncategorized/rocketmq个人定制/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2181,7 +2272,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/blog/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/blog/">1</a><a class="page-number" href="/blog/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/blog/page/4/">4</a><a class="extend next" rel="next" href="/blog/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/blog/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/blog/">1</a><a class="page-number" href="/blog/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/blog/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/blog/page/6/">6</a><a class="extend next" rel="next" href="/blog/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -2224,7 +2315,7 @@
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2271,7 +2362,23 @@
                     
                       
                     
-                    <span class="site-state-item-count">17</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2336,7 +2443,45 @@
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">45</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2379,7 +2524,7 @@
         <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
 
-<div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
