@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心 用到的第三方系统springboot-2.0.3.RELEASE​    项目是web工程，使用内嵌tomcat方式，页面转发使用springmvc elasticsearch-6.3.0​    持久化用的是elasticsearch，如何读取日志相关的配置信息都放在elasticsearch上。读到的日志默认也是存到el">
+  <meta name="description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心">
 <meta name="keywords" content="code">
 <meta property="og:type" content="article">
 <meta property="og:title" content="日志收集器">
 <meta property="og:url" content="http://yoursite.com/code/日志收集器/index.html">
 <meta property="og:site_name" content="我的云笔记">
-<meta property="og:description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心 用到的第三方系统springboot-2.0.3.RELEASE​    项目是web工程，使用内嵌tomcat方式，页面转发使用springmvc elasticsearch-6.3.0​    持久化用的是elasticsearch，如何读取日志相关的配置信息都放在elasticsearch上。读到的日志默认也是存到el">
+<meta property="og:description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/blog/images/1547851272684.png">
-<meta property="og:updated_time" content="2019-01-19T02:16:07.708Z">
+<meta property="og:updated_time" content="2019-10-05T12:14:18.049Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="日志收集器">
-<meta name="twitter:description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心 用到的第三方系统springboot-2.0.3.RELEASE​    项目是web工程，使用内嵌tomcat方式，页面转发使用springmvc elasticsearch-6.3.0​    持久化用的是elasticsearch，如何读取日志相关的配置信息都放在elasticsearch上。读到的日志默认也是存到el">
+<meta name="twitter:description" content="系统概述主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心">
 <meta name="twitter:image" content="http://yoursite.com/blog/images/1547851272684.png">
 
 
@@ -391,7 +391,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-01-19 10:16:07" itemprop="dateModified" datetime="2019-01-19T10:16:07+08:00">2019-01-19</time>
+                <time title="修改时间：2019-10-05 20:14:18" itemprop="dateModified" datetime="2019-10-05T20:14:18+08:00">2019-10-05</time>
               
             
           </span>
@@ -454,6 +454,7 @@
 
       
         <h1 id="系统概述"><a href="#系统概述" class="headerlink" title="系统概述"></a>系统概述</h1><p>主要功能，根据配置读取指定服务器上的日志，格式化后发送到日志中心</p>
+<a id="more"></a>
 <h2 id="用到的第三方系统"><a href="#用到的第三方系统" class="headerlink" title="用到的第三方系统"></a>用到的第三方系统</h2><h3 id="springboot-2-0-3-RELEASE"><a href="#springboot-2-0-3-RELEASE" class="headerlink" title="springboot-2.0.3.RELEASE"></a>springboot-2.0.3.RELEASE</h3><p>​    项目是web工程，使用内嵌tomcat方式，页面转发使用springmvc</p>
 <h3 id="elasticsearch-6-3-0"><a href="#elasticsearch-6-3-0" class="headerlink" title="elasticsearch-6.3.0"></a>elasticsearch-6.3.0</h3><p>​    持久化用的是elasticsearch，如何读取日志相关的配置信息都放在elasticsearch上。读到的日志默认也是存到elasticsearch里面</p>
 <h3 id="httpclient-4-5-5"><a href="#httpclient-4-5-5" class="headerlink" title="httpclient-4.5.5"></a>httpclient-4.5.5</h3><p>​    和elasticsearch通信全部走的是restful接口，用httpclient进行通讯</p>
@@ -562,7 +563,7 @@
 <p>前端框引入了bootstrap和jquery</p>
 <h4 id="spring-boot-configuration-processor"><a href="#spring-boot-configuration-processor" class="headerlink" title="spring-boot-configuration-processor"></a>spring-boot-configuration-processor</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-configuration-processor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">optional</span>&gt;</span>true<span class="tag">&lt;/<span class="name">optional</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>spring提供的工具类，引入这个jar后，在项目里修改application.yaml就会有提示了</p>
-<a id="more"></a>
+<!--more-->
       
     </div>
 
