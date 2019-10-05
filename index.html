@@ -1812,7 +1812,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/docker/kubeadm/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/docker/docker-net/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -1831,8 +1831,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/docker/kubeadm/" itemprop="url">
-                  docker初始化
+                <a class="post-title-link" href="/blog/docker/docker-net/" itemprop="url">
+                  docker网络设置
                 </a>
               
             
@@ -1858,7 +1858,7 @@
                 
               
 
-              <time title="创建时间：2019-02-01 12:20:38" itemprop="dateCreated datePublished" datetime="2019-02-01T12:20:38+08:00">2019-02-01</time>
+              <time title="创建时间：2018-08-30 07:44:24" itemprop="dateCreated datePublished" datetime="2018-08-30T07:44:24+08:00">2018-08-30</time>
             
 
             
@@ -1875,7 +1875,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-02-05 14:58:59" itemprop="dateModified" datetime="2019-02-05T14:58:59+08:00">2019-02-05</time>
+                <time title="修改时间：2019-02-04 11:22:37" itemprop="dateModified" datetime="2019-02-04T11:22:37+08:00">2019-02-04</time>
               
             
           </span>
@@ -1906,7 +1906,7 @@
 
           
           
-             <span id="/blog/docker/kubeadm/" class="leancloud_visitors" data-flag-title="docker初始化">
+             <span id="/blog/docker/docker-net/" class="leancloud_visitors" data-flag-title="docker网络设置">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1938,26 +1938,14 @@
 
       
         
-          
-            <p>准备工作</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>关闭防火墙 iptables -nL --line-number</span><br><span class="line"><span class="meta">#</span>关闭selinux</span><br><span class="line"><span class="meta">#</span>关闭swap 注释&gt;/etc/fstab里的swap配置</span><br><span class="line"><span class="meta">#</span>修改转发相关参数</span><br><span class="line"><span class="meta">#</span>ip改为静态</span><br><span class="line">setenforce  0 </span><br><span class="line">swapoff -a</span><br><span class="line">iptables -F</span><br><span class="line">systemctl enable docker</span><br><span class="line">systemctl enable kubele</span><br><span class="line">systemctl stop firewalld</span><br><span class="line"></span><br><span class="line">sed -i 's/SELINUX=.*/SELINUX=disabled/' /etc/sysconfig/selinux</span><br><span class="line">sed -i 's/^.* swap /#&amp;/' /etc/fstab</span><br><span class="line">cp /media/sf_linux/usr/lib/sysctl.d/00-system.conf /usr/lib/sysctl.d/</span><br><span class="line">cp /media/sf_linux/etc/hosts /etc/</span><br><span class="line"><span class="meta">#</span>新加入机器需重新设置和hostname</span><br><span class="line">hostnamectl set-hostname node1</span><br><span class="line">cat /media/sf_linux/etc/sysconfig/network-scripts/ifcfg-enp0s3 | sed  "s/192.168.1.200/192.168.1.201/" &gt; /etc/sysconfig/network-scripts/ifcfg-enp0s3</span><br><span class="line">systemctl restart network</span><br></pre></td></tr></table></figure>
-<p>安装</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>安装docker并设置为开机启动</span><br><span class="line">yum -y install docker</span><br><span class="line">cp -rf /var/lib/docker/ /home/docker/</span><br><span class="line">rm -rf /var/lib/docker/</span><br><span class="line">ln -sd /home/docker/ /var/lib/docker</span><br><span class="line">tee /etc/docker/daemon.json &lt;&lt;-'EOF'</span><br><span class="line">&#123;</span><br><span class="line">  "registry-mirrors": ["https://jyvpxfwu.mirror.aliyuncs.com"]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">systemctl enable docker</span><br><span class="line">systemctl start docker</span><br></pre></td></tr></table></figure>
-<p>安装 kubeadm, kubelet 和 kubectl</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install -y kubelet kubeadm kubectl </span><br><span class="line">systemctl enable kubelet</span><br><span class="line">systemctl start kubelet</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>由于网络原因,需手动拉取镜像</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>拉取</span><br><span class="line">docker pull mirrorgooglecontainers/kube-apiserver:v1.13.2</span><br><span class="line">docker pull mirrorgooglecontainers/kube-controller-manager:v1.13.2</span><br><span class="line">docker pull mirrorgooglecontainers/kube-scheduler:v1.13.2</span><br><span class="line">docker pull mirrorgooglecontainers/kube-proxy:v1.13.2</span><br><span class="line">docker pull mirrorgooglecontainers/pause:3.1</span><br><span class="line">docker pull mirrorgooglecontainers/etcd:3.2.24</span><br><span class="line">docker pull coredns/coredns:1.2.6</span><br><span class="line"><span class="meta">#</span>重打标签</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kube-proxy:v1.13.2 k8s.gcr.io/kube-proxy:v1.13.2</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kube-scheduler:v1.13.2 k8s.gcr.io/kube-scheduler:v1.13.2</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kube-apiserver:v1.13.2 k8s.gcr.io/kube-apiserver:v1.13.2</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kube-controller-manager:v1.13.2 k8s.gcr.io/kube-controller-manager:v1.13.2</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/etcd:3.2.24  k8s.gcr.io/etcd:3.2.24</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/pause:3.1  k8s.gcr.io/pause:3.1</span><br><span class="line">docker tag docker.io/coredns/coredns:1.2.6  k8s.gcr.io/coredns:1.2.6</span><br></pre></td></tr></table></figure>
-<p>安装kubenetes</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>关闭swap</span><br><span class="line">swapoff -a</span><br><span class="line"><span class="meta">#</span>如果之前装过,就reset</span><br><span class="line"><span class="meta">#</span>kubeadm reset</span><br><span class="line">kubeadm init --kubernetes-version=1.13.2 --pod-network-cidr=10.244.0.0/16</span><br></pre></td></tr></table></figure>
-<p>设置权限</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p $HOME/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br></pre></td></tr></table></figure>
-<p>安装flannel</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f  /media/sf_linux/kubernetes/kube-flannel-rbac.yaml</span><br><span class="line">kubectl apply -f  /media/sf_linux/kubernetes/kube-flannel.yml</span><br></pre></td></tr></table></figure>
-<p>加入node</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join 192.168.1.200:6443 --token okilby.7ivwzs2k74v0e5zc --discovery-token-ca-cert-hash sha256:b3e98ce33b0c0bbc8566b7038763f379f9b3e2882b03a0ad2a296dd2117ef77a</span><br></pre></td></tr></table></figure>
-
-          
+          <p>个人笔记</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/docker/docker-net/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -2009,7 +1997,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/uncategorized/haproxy/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/kubernets/kubernets安装/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="">
@@ -2028,7 +2016,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/blog/uncategorized/haproxy/" itemprop="url">
+                <a class="post-title-link" href="/blog/kubernets/kubernets安装/" itemprop="url">
                   未命名
                 </a>
               
@@ -2055,17 +2043,47 @@
                 
               
 
-              <time title="创建时间：2019-02-04 11:22:42 / 修改时间：11:25:25" itemprop="dateCreated datePublished" datetime="2019-02-04T11:22:42+08:00">2019-02-04</time>
+              <time title="创建时间：2019-02-02 15:54:31" itemprop="dateCreated datePublished" datetime="2019-02-02T15:54:31+08:00">2019-02-02</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-02-03 21:36:35" itemprop="dateModified" datetime="2019-02-03T21:36:35+08:00">2019-02-03</time>
               
             
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/kubernets/" itemprop="url" rel="index"><span itemprop="name">kubernets</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -2073,7 +2091,7 @@
 
           
           
-             <span id="/blog/uncategorized/haproxy/" class="leancloud_visitors" data-flag-title="">
+             <span id="/blog/kubernets/kubernets安装/" class="leancloud_visitors" data-flag-title="">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -2105,10 +2123,44 @@
 
       
         
-          <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">docker pull haproxy:1.7.8-alpine</span><br><span class="line">mkdir /etc/haproxy</span><br><span class="line">cp /media/sf_linux/etc/haproxy/haproxy.cfg /etc/haproxy/</span><br><span class="line">setenforce 0</span><br><span class="line">docker run --rm --name my-haproxy -v /etc/haproxy:/usr/local/etc/haproxy:ro -p 8443:8443 -p 1080:1080  haproxy:1.7.8-alpine</span><br></pre></td></tr></table></figure>
+          <p>准备工作</p>
+<p>master01:192.168.1.110</p>
+<p>node01:192.168.1.106</p>
+<p>关闭防火墙</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl disable firewalld</span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
+<p>yum安装</p>
+<p>master</p>
+<p>192.168.1.110</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install kubernetes-master etcd -y</span><br></pre></td></tr></table></figure>
+<p>配置</p>
+<p>vim /etc/etcd/etcd.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ETCD_DATA_DIR=&quot;/var/lib/etcd/abc&quot;</span><br><span class="line">ETCD_LISTEN_PEER_URLS=&quot;http://192.168.1.110:2380&quot;</span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=&quot;http://192.168.1.110:2379&quot;</span><br><span class="line">ETCD_NAME=&quot;etcd1&quot;</span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=&quot;http://192.168.1.110:2380&quot;</span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=&quot;http://192.168.1.110:2379&quot;</span><br><span class="line">ETCD_INITIAL_CLUSTER=&quot;etcd1=http://192.168.1.110:2380,etcd2=http://192.168.1.106:2380&quot;</span><br></pre></td></tr></table></figure>
+<p>vim  /etc/kubernetes/apiserver</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">KUBE_API_ADDRESS=&quot;--insecure-bind-address=127.0.0.1&quot;</span><br><span class="line">KUBE_ETCD_SERVERS=&quot;--etcd-servers=http://192.168.1.110:2379,http://192.168.1.106:2379&quot;</span><br><span class="line">KUBE_SERVICE_ADDRESSES=&quot;--service-cluster-ip-range=10.254.0.0/16&quot;</span><br><span class="line">KUBE_API_ARGS=&quot;&quot;</span><br></pre></td></tr></table></figure>
+<p>vim /etc/kubernetes/config</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">KUBE_LOGTOSTDERR=&quot;--logtostderr=true&quot;</span><br><span class="line">KUBE_LOG_LEVEL=&quot;--v=0&quot;</span><br><span class="line">KUBE_ALLOW_PRIV=&quot;--allow-privileged=false&quot;</span><br><span class="line">KUBE_MASTER=&quot;--master=http://192.168.1.110:8080&quot;</span><br></pre></td></tr></table></figure>
+<p>重启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>停止</span><br><span class="line">systemctl stop etcd</span><br><span class="line">systemctl stop kube-apiserver</span><br><span class="line">systemctl stop kube-controller-manager</span><br><span class="line">systemctl stop kube-scheduler</span><br><span class="line"><span class="meta">#</span>启动</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart etcd</span><br><span class="line">systemctl restart kube-apiserver</span><br><span class="line">systemctl restart kube-controller-manager</span><br><span class="line">systemctl restart kube-scheduler</span><br></pre></td></tr></table></figure>
+<p>查看</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get nodes --insecure-skip-tls-verify=true</span><br></pre></td></tr></table></figure>
+<p>node</p>
+<p>192.168.1.105</p>
+<p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install kubernetes-node etcd flannel -y</span><br></pre></td></tr></table></figure>
+<p>配置</p>
+<p>vim /etc/etcd/etcd.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ETCD_DATA_DIR=&quot;/var/lib/etcd/default.etcd&quot;</span><br><span class="line">ETCD_LISTEN_PEER_URLS=&quot;http://192.168.1.106:2380&quot;</span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=&quot;http://192.168.1.106:2379,http://127.0.0.1:2379&quot;</span><br><span class="line">ETCD_NAME=&quot;etcd2&quot;</span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=&quot;http://192.168.1.106:2380&quot;</span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=&quot;http://192.168.1.106:2379&quot;</span><br><span class="line">ETCD_INITIAL_CLUSTER=&quot;etcd1=http://192.168.1.110:2380,etcd2=http://192.168.1.106:2380&quot;</span><br></pre></td></tr></table></figure>
+<p>vim /etc/kubernetes/kubelet</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">KUBELET_ADDRESS=&quot;--address=0.0.0.0&quot;</span><br><span class="line">KUBELET_HOSTNAME=&quot;--hostname-override=node01.kube.wang&quot;</span><br><span class="line">KUBELET_API_SERVER=&quot;--api-servers=http://192.168.1.110:8080&quot;</span><br><span class="line">KUBELET_POD_INFRA_CONTAINER=&quot;--pod-infra-container-image=registry.access.redhat.com/rhel7/pod-infrastructure:latest&quot;</span><br><span class="line">KUBELET_ARGS=&quot;&quot;</span><br></pre></td></tr></table></figure>
+<p>启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart kube-proxy</span><br><span class="line">systemctl restart kubelet</span><br></pre></td></tr></table></figure>
+<p>客户端设置kubectl</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl config set-cluster kubernetes --server=http://192.168.1.110:8080</span><br><span class="line">kubectl config set-context kubernetes --cluster=kubernetes</span><br><span class="line">kubectl config use-context kubernetes</span><br></pre></td></tr></table></figure>
+<p>dashboard</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull docker.io/mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1  k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1</span><br></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/blog/uncategorized/haproxy/#more" rel="contents">
+            <a class="btn" href="/blog/kubernets/kubernets安装/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2196,7 +2248,7 @@
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-count">52</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
