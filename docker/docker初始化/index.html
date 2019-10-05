@@ -108,19 +108,19 @@
 
 
 
-  <meta name="description" content="安装1yum install docker -y 修改docker目录  1docker info |grep Dir  12345678910#停止服务#将文件复制到目标目录#删除源文件#创建软链#重启systemctl stop dockercp -rf /var/lib/docker/ /home/docker/rm -rf /var/lib/docker/ln -sd /home/dock">
+  <meta name="description" content="docker初始化">
 <meta name="keywords" content="docker">
 <meta property="og:type" content="article">
 <meta property="og:title" content="docker初始化">
 <meta property="og:url" content="http://yoursite.com/docker/docker初始化/index.html">
 <meta property="og:site_name" content="我的云笔记">
-<meta property="og:description" content="安装1yum install docker -y 修改docker目录  1docker info |grep Dir  12345678910#停止服务#将文件复制到目标目录#删除源文件#创建软链#重启systemctl stop dockercp -rf /var/lib/docker/ /home/docker/rm -rf /var/lib/docker/ln -sd /home/dock">
+<meta property="og:description" content="docker初始化">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/blog/images/1549169899721.png">
-<meta property="og:updated_time" content="2019-10-05T00:35:52.651Z">
+<meta property="og:updated_time" content="2019-10-05T05:54:12.877Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker初始化">
-<meta name="twitter:description" content="安装1yum install docker -y 修改docker目录  1docker info |grep Dir  12345678910#停止服务#将文件复制到目标目录#删除源文件#创建软链#重启systemctl stop dockercp -rf /var/lib/docker/ /home/docker/rm -rf /var/lib/docker/ln -sd /home/dock">
+<meta name="twitter:description" content="docker初始化">
 <meta name="twitter:image" content="http://yoursite.com/blog/images/1549169899721.png">
 
 
@@ -391,7 +391,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-10-05 08:35:52" itemprop="dateModified" datetime="2019-10-05T08:35:52+08:00">2019-10-05</time>
+                <time title="修改时间：2019-10-05 13:54:12" itemprop="dateModified" datetime="2019-10-05T13:54:12+08:00">2019-10-05</time>
               
             
           </span>
@@ -453,7 +453,9 @@
       
 
       
-        <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker -y</span><br></pre></td></tr></table></figure>
+        <p>docker初始化</p>
+<a id="more"></a>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install docker -y</span><br></pre></td></tr></table></figure>
 <p>修改docker目录</p>
  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker info |grep Dir</span><br></pre></td></tr></table></figure>
 <p><img src="/blog/images/1549169899721.png" alt="1549169899721"></p>
@@ -468,7 +470,7 @@
 <h3 id="yum无法使用"><a href="#yum无法使用" class="headerlink" title="yum无法使用"></a>yum无法使用</h3><p>修改以下两个文件的python声明为2.7</p>
 <figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/python2.<span class="number">7</span></span><br><span class="line">vim /usr/bin/yum </span><br><span class="line">vim /usr/libexec/urlgrabber-ext-down</span><br></pre></td></tr></table></figure>
 <h2 id="安装docker-compose-1"><a href="#安装docker-compose-1" class="headerlink" title="安装docker-compose"></a>安装docker-compose</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip3.4 install  --upgrade pip</span><br><span class="line">pip3.4 install docker-compose</span><br></pre></td></tr></table></figure>
-<a id="more"></a>
+<!--more-->
       
     </div>
 
