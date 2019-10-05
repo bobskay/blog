@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="bootstrap页签三个页签的页面 nav nav-tabs：页签的头 tab-content：每个页签显示的内容 tab-pane：固定的内容   $(‘#myTabs a[href=”#tab1”]’).tab(‘show’); 页面加载完毕显示第一个页签 123456789101112131415161718192021222324252627282930&amp;lt;div&amp;gt;    &amp;l">
+<meta name="keywords" content="code,javascirpt,html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="页面代码模板">
+<meta property="og:url" content="http://yoursite.com/code/页面代码模板/index.html">
+<meta property="og:site_name" content="我的云笔记">
+<meta property="og:description" content="bootstrap页签三个页签的页面 nav nav-tabs：页签的头 tab-content：每个页签显示的内容 tab-pane：固定的内容   $(‘#myTabs a[href=”#tab1”]’).tab(‘show’); 页面加载完毕显示第一个页签 123456789101112131415161718192021222324252627282930&amp;lt;div&amp;gt;    &amp;l">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-02-06T09:45:11.111Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="页面代码模板">
+<meta name="twitter:description" content="bootstrap页签三个页签的页面 nav nav-tabs：页签的头 tab-content：每个页签显示的内容 tab-pane：固定的内容   $(‘#myTabs a[href=”#tab1”]’).tab(‘show’); 页面加载完毕显示第一个页签 123456789101112131415161718192021222324252627282930&amp;lt;div&amp;gt;    &amp;l">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/code/页面代码模板/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>页面代码模板 | 我的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5102824f4157d2cbdb282a1a889d910e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/页面代码模板/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">页面代码模板
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-20 03:16:21" itemprop="dateCreated datePublished" datetime="2019-01-20T03:16:21+08:00">2019-01-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-02-06 17:45:11" itemprop="dateModified" datetime="2019-02-06T17:45:11+08:00">2019-02-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/code/页面代码模板/" class="leancloud_visitors" data-flag-title="页面代码模板">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="bootstrap"><a href="#bootstrap" class="headerlink" title="bootstrap"></a>bootstrap</h1><h2 id="页签"><a href="#页签" class="headerlink" title="页签"></a>页签</h2><p>三个页签的页面</p>
+<p>nav nav-tabs：页签的头</p>
+<p>tab-content：每个页签显示的内容</p>
+<p>tab-pane：固定的内容</p>
+<p>  $(‘#myTabs a[href=”#tab1”]’).tab(‘show’); 页面加载完毕显示第一个页签</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Nav tabs --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ul</span> <span class="attr">class</span>=<span class="string">"nav nav-tabs"</span> <span class="attr">id</span>=<span class="string">"myTabs"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"#tab1"</span> <span class="attr">data-toggle</span>=<span class="string">"tab"</span>&gt;</span>tab1 titile<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"#tab2"</span> <span class="attr">data-toggle</span>=<span class="string">"tab"</span>&gt;</span>tab2 title<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">li</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"#tab3"</span> <span class="attr">data-toggle</span>=<span class="string">"tab"</span>&gt;</span>tab3 title<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"tab-content"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"tab-pane "</span> <span class="attr">id</span>=<span class="string">"tab1"</span>&gt;</span></span><br><span class="line">           tab1的内容</span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"tab-pane "</span> <span class="attr">id</span>=<span class="string">"tab2"</span>&gt;</span></span><br><span class="line">            tab2的内容</span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"tab-pane "</span> <span class="attr">id</span>=<span class="string">"tab3"</span>&gt;</span></span><br><span class="line">            tab3的内容</span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"tab-pane"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">class</span>=<span class="string">"btn-sm btn-primary"</span>&gt;</span>测试按钮<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    $('#myTabs a[href="#tab1"]').tab('show');</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="select"><a href="#select" class="headerlink" title="select"></a>select</h1><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">select</span> <span class="attr">class</span>=<span class="string">"selectpicker"</span>  <span class="attr">name</span>=<span class="string">"mySelect"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">"1"</span>&gt;</span>text1<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">option</span> <span class="attr">value</span>=<span class="string">"2"</span>&gt;</span>text2<span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">$('.selectpicker').selectpicker(&#123;</span></span><br><span class="line"><span class="undefined">        "width":"100px"</span></span><br><span class="line"><span class="undefined">&#125;);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="动态修改表格"><a href="#动态修改表格" class="headerlink" title="动态修改表格"></a>动态修改表格</h1><p>表格必须设置id</p>
+<p>第一个tr也要设置id，并且隐藏</p>
+<h2 id="表格内容"><a href="#表格内容" class="headerlink" title="表格内容"></a>表格内容</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="tag">&lt;<span class="name">table</span> <span class="attr">class</span>=<span class="string">"list"</span> <span class="attr">id</span>=<span class="string">"formatTable"</span>&gt;</span></span><br><span class="line"> 	<span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">th</span>&gt;</span>aaa<span class="tag">&lt;/<span class="name">th</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">th</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--加号--&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">button</span> <span class="attr">onclick</span>=<span class="string">"addColumn()"</span>  <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">class</span>=<span class="string">"btn btn-default"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"glyphicon glyphicon-plus"</span> <span class="attr">aria-hidden</span>=<span class="string">"true"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">th</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">     	<span class="comment">&lt;!--第一行作为模板,动态添加时复制这行--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">tr</span> <span class="attr">id</span>=<span class="string">"columnTr"</span> <span class="attr">style</span>=<span class="string">"display: none"</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">td</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">input</span> <span class="attr">title</span>=<span class="string">"insertRow"</span> <span class="attr">class</span>=<span class="string">"form-control"</span>/&gt;</span></span><br><span class="line">         <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">td</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">button</span> <span class="attr">onclick</span>=<span class="string">"delColumn(this)"</span>  <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">class</span>=<span class="string">"btn btn-default"</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"glyphicon glyphicon-minus"</span> <span class="attr">aria-hidden</span>=<span class="string">"true"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="新增行"><a href="#新增行" class="headerlink" title="新增行"></a>新增行</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addColumn</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> cloneTr = $(<span class="string">"#columnTr"</span>).clone();</span><br><span class="line">	cloneTr.show();</span><br><span class="line">	$(<span class="string">"#formatTable"</span>).append(cloneTr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="删除行"><a href="#删除行" class="headerlink" title="删除行"></a>删除行</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">delColumn</span>(<span class="params">el</span>) </span>&#123;</span><br><span class="line">	$(el).parent().parent().remove();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="操作相邻td"><a href="#操作相邻td" class="headerlink" title="操作相邻td"></a>操作相邻td</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myInput=$(el).parent().parent().find(<span class="string">"input[title='myInput']"</span>);</span><br><span class="line">myInput.show();</span><br></pre></td></tr></table></figure>
+<h2 id="提交"><a href="#提交" class="headerlink" title="提交"></a>提交</h2><p>第一行由于一直是隐藏的，所以没值，需要跳过验证，所以input的name在批量提交的时候设置</p>
+<p>为了方便定位，给每个需要提交的元素都设置title</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">title</span>=<span class="string">"字段"</span> <span class="attr">class</span>=<span class="string">"form-control"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="ztree"><a href="#ztree" class="headerlink" title="ztree"></a>ztree</h1><p>后台返回ztree的节点对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/tree"</span>)</span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> Response&lt;List&lt;Ztree&gt;&gt; tree(String zkAddress)  &#123;</span><br><span class="line">    List&lt;CollectorTask&gt; tasks = collectorTaskService.getAll();</span><br><span class="line">    List list = Ztree.createTree(tasks, t -&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> nodeToZtree(t);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> respone(list);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Ztree <span class="title">nodeToZtree</span><span class="params">(CollectorTask node)</span></span>&#123;</span><br><span class="line">	Ztree view = <span class="keyword">new</span> Ztree();</span><br><span class="line">	view.setParentId(<span class="string">""</span>);</span><br><span class="line">	view.setId(node.getCollectorTaskId());</span><br><span class="line">	view.setName(node.getDir());</span><br><span class="line">    <span class="keyword">return</span> view;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>初始化ztree</p>
+<p>新增一个id为detail的div存放详细页面</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"panel-body"</span> <span class="attr">style</span>=<span class="string">"padding:0px; width: 99%"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"panel panel-default"</span> <span class="attr">style</span>=<span class="string">"margin: 0px"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"panel-heading"</span>&gt;</span>日志收集任务<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"panel-body row"</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"col-sm-3"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">ul</span> <span class="attr">id</span>=<span class="string">"zkTree"</span> <span class="attr">class</span>=<span class="string">"ztree"</span> <span class="attr">style</span>=<span class="string">"background-color: white;width: 100%;"</span>&gt;</span><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"col-sm-9"</span> <span class="attr">id</span>=<span class="string">"detail"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>用js添加节点</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//点击节点</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">zTreeOnClick</span>(<span class="params">event, treeId, treeNode</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> data=<span class="string">"id="</span>+treeNode.id</span><br><span class="line">    ajaxUtil.html(<span class="string">"$path/get"</span>, data, <span class="function"><span class="keyword">function</span> (<span class="params">html</span>) </span>&#123;</span><br><span class="line">        $(<span class="string">"#detail"</span>).html(html);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> zTreeObj;</span><br><span class="line"><span class="keyword">var</span> setting = &#123;</span><br><span class="line">    callback: &#123;</span><br><span class="line">        onClick: zTreeOnClick</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//页面加载完毕后调用后台js获取树信息</span></span><br><span class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    dialog.loading();</span><br><span class="line">    ajaxUtil.json(<span class="string">'$&#123;path&#125;/tree'</span>, <span class="string">""</span>, <span class="function"><span class="keyword">function</span> (<span class="params">resp</span>) </span>&#123;</span><br><span class="line">        dialog.loading(<span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">if</span> (!resp.success) &#123;</span><br><span class="line">            dialog.alert(resp.message);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        zTreeObj = $.fn.zTree.init($(<span class="string">"#zkTree"</span>), setting, resp.data);</span><br><span class="line">        zTreeObj.expandAll(<span class="literal">true</span>);<span class="comment">//展开树</span></span><br><span class="line">        <span class="comment">//自动调整大小</span></span><br><span class="line">        <span class="keyword">var</span> menuBar=$(<span class="string">"#menuBar"</span>).height();</span><br><span class="line">        <span class="keyword">var</span> height=<span class="built_in">document</span>.documentElement.clientHeight-menuBar</span><br><span class="line">        <span class="keyword">var</span> top=$(<span class="string">"#zkTree"</span>).offset().top;</span><br><span class="line">        $(<span class="string">"#zkTree"</span>).css(<span class="string">"height"</span>, height-top);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h1 id="boostrap-table"><a href="#boostrap-table" class="headerlink" title="boostrap-table"></a>boostrap-table</h1><h2 id="显示的列"><a href="#显示的列" class="headerlink" title="显示的列"></a>显示的列</h2><p>columns是一个数组</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> columns = [</span><br><span class="line">    &#123;<span class="attr">checkbox</span>: <span class="literal">true</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'bookId'</span>,<span class="attr">title</span>:<span class="string">'图书信息'</span>,<span class="attr">formatter</span>:detailLink,<span class="attr">events</span>:showDetail&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'bookName'</span>,<span class="attr">title</span>:<span class="string">'书名'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'publication'</span>,<span class="attr">title</span>:<span class="string">'发行日期'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'price'</span>,<span class="attr">title</span>:<span class="string">'售价'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'isbn'</span>,<span class="attr">title</span>:<span class="string">'ISBN'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'valid'</span>,<span class="attr">title</span>:<span class="string">'有效标识'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'remain'</span>,<span class="attr">title</span>:<span class="string">'库存'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">field</span>:<span class="string">'createTime'</span>,<span class="attr">title</span>:<span class="string">'创建时间'</span>&#125;,</span><br><span class="line">    &#123;<span class="attr">title</span>: <span class="string">"操作"</span>, <span class="attr">formatter</span>: btnOperate, <span class="attr">events</span>: tableEvents , <span class="attr">visible</span>: <span class="literal">false</span>&#125;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<h3 id="显示格式"><a href="#显示格式" class="headerlink" title="显示格式"></a>显示格式</h3><p>显示checkbox:{checkbox: true}</p>
+<p>显示格式:formatter</p>
+<ol>
+<li>button</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">btnOperate = <span class="function"><span class="keyword">function</span> (<span class="params">value, row, index</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'&lt;button id="btnOperate" class="btn-small btn-primary"&gt;操作&lt;/button&gt;'</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>a</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">detailLink=<span class="function"><span class="keyword">function</span>(<span class="params">value, row, index</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span>  <span class="string">'&lt;a href="JavaScript:" id="detailLink"&gt;'</span>+value+<span class="string">'&lt;/a&gt;'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>日期</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dateToString=<span class="function"><span class="keyword">function</span>(<span class="params">value, row, index</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!value)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> d=<span class="keyword">new</span> <span class="built_in">Date</span>(value);</span><br><span class="line">    <span class="keyword">return</span> d.format(<span class="string">"yyyy-MM-dd hh:mm:ss"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><p>显示详情</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">showDetail= &#123;</span><br><span class="line">       <span class="string">"click #detailLink"</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, value, row, index</span>) </span>&#123;</span><br><span class="line">           <span class="keyword">var</span> url=<span class="string">"$&#123;path&#125;/get"</span>;</span><br><span class="line">           <span class="keyword">var</span> data=<span class="string">"name="</span>+row.name+<span class="string">"&amp;tag="</span>+row.tag</span><br><span class="line">           ajaxUtil.html(url,data,<span class="function"><span class="keyword">function</span> (<span class="params">content</span>) </span>&#123;</span><br><span class="line">               dialog.createPop(<span class="string">"detail"</span>,<span class="string">"镜像详情"</span>,content,<span class="number">3</span>);</span><br><span class="line">           &#125;)</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>按钮</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">tableEvents = &#123;</span><br><span class="line">    <span class="string">"click #btnOperate"</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, value, row, index</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> data = <span class="string">""</span>;</span><br><span class="line">        ajaxUtil.json(<span class="string">"$path/xxx"</span>, data, <span class="function"><span class="keyword">function</span> (<span class="params">ret</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!ret.success) &#123;</span><br><span class="line">                dialog.alert(ret.message);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                dialog.alert(<span class="string">"操作成功"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>弹出框</li>
+</ol>
+<p>设置link 的format</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">function <span class="title">createPop</span><span class="params">(title,value)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">"&lt;tr&gt;&lt;td&gt;"</span>+title+<span class="string">"&lt;/td&gt;&lt;td&gt;"</span>+value+<span class="string">"&lt;/td&gt;&lt;/tr&gt;"</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//构造link,设置title和content</span></span><br><span class="line">nameLink=function(value, row, index)&#123;</span><br><span class="line">    var content=<span class="string">"&lt;table class='table table-condensed'&gt;"</span>;</span><br><span class="line">    content+=createPop(<span class="string">"已经执行次数"</span>,row.ran);</span><br><span class="line">    content+=createPop(<span class="string">"成功个数"</span>,row.success);</span><br><span class="line">    content+=createPop(<span class="string">"成功平均用时"</span>,divide(row.successTime,row.success));</span><br><span class="line">    content+=createPop(<span class="string">"失败个数"</span>,row.failue);</span><br><span class="line">    content+=createPop(<span class="string">"失败平均用时"</span>,divide(row.totalTime-row.successTime,row.failue));</span><br><span class="line">    content+=createPop(<span class="string">"最短耗时ms"</span>,row.minTime);</span><br><span class="line">    content+=createPop(<span class="string">"最长用时ms"</span>,row.maxTime);</span><br><span class="line">    content+=createPop(<span class="string">"总用时"</span>,row.totalTime);</span><br><span class="line">    content+=<span class="string">"&lt;/table&gt;"</span></span><br><span class="line">        <span class="keyword">return</span>  <span class="string">'&lt;a href="javascript:" title="执行情况"  name="nameLink" content="'</span>+content+<span class="string">'"&gt;'</span>+value+<span class="string">'&lt;/a&gt;'</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>表格加载成功后设置popover</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">"a[name='nameLink']"</span>).each(function (idx,el) &#123;</span><br><span class="line">    var content=$(el).attr(<span class="string">"content"</span>);</span><br><span class="line">    var title=$(el).attr(<span class="string">"title"</span>);</span><br><span class="line">    $(el).popover(&#123;</span><br><span class="line">        html:<span class="keyword">true</span>,</span><br><span class="line">        placement:<span class="string">'right'</span>,</span><br><span class="line">        trigger:<span class="string">'hover'</span>,</span><br><span class="line">        title:title,</span><br><span class="line">        content:content</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="客户端分页"><a href="#客户端分页" class="headerlink" title="客户端分页"></a>客户端分页</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tableDiv表格id,columns列信息</span></span><br><span class="line"><span class="comment">//回调函数设置自定义的参数</span></span><br><span class="line">tableUtil.init(tableDiv, columns, <span class="string">''</span>, <span class="function"><span class="keyword">function</span> (<span class="params">config</span>) </span>&#123;</span><br><span class="line">    config.uniqueId = <span class="string">'taskInfoId'</span>;</span><br><span class="line">    config.height=<span class="built_in">document</span>.documentElement.clientHeight<span class="number">-60</span>;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//加载返回的数据(url,param,callback)</span></span><br><span class="line"><span class="comment">//callback可以在加载成功后修改页面元素</span></span><br><span class="line">tableUtil.load(<span class="string">'$path/getAll'</span>,<span class="string">''</span>,<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">   </span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/code/" rel="tag"># code</a>
+          
+            <a href="/blog/tags/javascirpt/" rel="tag"># javascirpt</a>
+          
+            <a href="/blog/tags/html/" rel="tag"># html</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/code/uuid/" rel="next" title="UUID生成">
+                <i class="fa fa-chevron-left"></i> UUID生成
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/redis/redis/" rel="prev" title="redis配置">
+                redis配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives">
+                
+                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">45</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#bootstrap"><span class="nav-number">1.</span> <span class="nav-text">bootstrap</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#页签"><span class="nav-number">1.1.</span> <span class="nav-text">页签</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#select"><span class="nav-number">2.</span> <span class="nav-text">select</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#动态修改表格"><span class="nav-number">3.</span> <span class="nav-text">动态修改表格</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#表格内容"><span class="nav-number">3.1.</span> <span class="nav-text">表格内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新增行"><span class="nav-number">3.2.</span> <span class="nav-text">新增行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除行"><span class="nav-number">3.3.</span> <span class="nav-text">删除行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作相邻td"><span class="nav-number">3.4.</span> <span class="nav-text">操作相邻td</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提交"><span class="nav-number">3.5.</span> <span class="nav-text">提交</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ztree"><span class="nav-number">4.</span> <span class="nav-text">ztree</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#boostrap-table"><span class="nav-number">5.</span> <span class="nav-text">boostrap-table</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#显示的列"><span class="nav-number">5.1.</span> <span class="nav-text">显示的列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#显示格式"><span class="nav-number">5.1.1.</span> <span class="nav-text">显示格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事件"><span class="nav-number">5.1.2.</span> <span class="nav-text">事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端分页"><span class="nav-number">5.2.</span> <span class="nav-text">客户端分页</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Pisces</a> v6.3.0</div>
+
+
+
+
+
+<span id="busuanzi_container_site_uv">
+  &nbsp;<span id="busuanzi_value_site_uv"></span>
+</span>
+
+<span>/</span>
+
+<span id="busuanzi_container_site_pv">
+    <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.3.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/blog/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("CIBUz5A0KNFv8xbAPO8ncqk6-gzGzoHsz", "YtGifAKqwENTTs9hhQ1GxdAG");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            
+            counter.save(null, {
+              success: function(counter) {
+                
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.get('time'));
+                
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            
+              var newcounter = new Counter();
+              /* Set ACL */
+              var acl = new AV.ACL();
+              acl.setPublicReadAccess(true);
+              acl.setPublicWriteAccess(true);
+              newcounter.setACL(acl);
+              /* End Set ACL */
+              newcounter.set("title", title);
+              newcounter.set("url", url);
+              newcounter.set("time", 1);
+              newcounter.save(null, {
+                success: function(newcounter) {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+                },
+                error: function(newcounter, error) {
+                  console.log('Failed to create');
+                }
+              });
+            
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
