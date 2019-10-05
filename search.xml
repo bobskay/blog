@@ -15,7 +15,7 @@
   <entry>
     <title><![CDATA[linux磁盘分区]]></title>
     <url>%2Fblog%2Flinux%2Ffdisk%2F</url>
-    <content type="text"><![CDATA[查看为分配的磁盘 1fdisk -l /dev/sdb 在文件系统里没有,说明未初始化 1234567#开始分区fdisk /dev/sdb#依次输入n p1w 查看新创建的磁盘 12ls /dev/sd*#多出2个/dev/sdb和/dev/sdb1 挂载 123456#格式化mkfs.ext4 /dev/sdb1 #创建目标目录mkdir /common#mount -t 表示文件系统mount -t ext4 /dev/sdb1 /common 开机挂载 12vim /etc/fstab /dev/sdb1 /common ext4 errors=remount-ro 0 1]]></content>
+    <content type="text"><![CDATA[linux磁盘分区 查看为分配的磁盘 1fdisk -l /dev/sdb 在文件系统里没有,说明未初始化 1234567#开始分区fdisk /dev/sdb#依次输入n p1w 查看新创建的磁盘 12ls /dev/sd*#多出2个/dev/sdb和/dev/sdb1 挂载 123456#格式化mkfs.ext4 /dev/sdb1 #创建目标目录mkdir /common#mount -t 表示文件系统mount -t ext4 /dev/sdb1 /common 开机挂载 12vim /etc/fstab /dev/sdb1 /common ext4 errors=remount-ro 0 1]]></content>
       <categories>
         <category>linux</category>
       </categories>
