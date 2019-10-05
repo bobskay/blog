@@ -108,18 +108,18 @@
 
 
 
-  <meta name="description" content="准备工作 master01:192.168.1.110 node01:192.168.1.106 关闭防火墙 12systemctl disable firewalldiptables -F yum安装 master 192.168.1.110 1yum install kubernetes-master etcd -y 配置 vim /etc/etcd/etcd.conf 1234567ETCD">
+  <meta name="description" content="kuberneteskubernetes">
 <meta name="keywords" content="kubernets">
 <meta property="og:type" content="article">
-<meta property="og:title" content="我的云笔记">
+<meta property="og:title" content="kubernetes安装">
 <meta property="og:url" content="http://yoursite.com/kubernets/kubernets安装/index.html">
 <meta property="og:site_name" content="我的云笔记">
-<meta property="og:description" content="准备工作 master01:192.168.1.110 node01:192.168.1.106 关闭防火墙 12systemctl disable firewalldiptables -F yum安装 master 192.168.1.110 1yum install kubernetes-master etcd -y 配置 vim /etc/etcd/etcd.conf 1234567ETCD">
+<meta property="og:description" content="kuberneteskubernetes">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-02-03T13:36:35.049Z">
+<meta property="og:updated_time" content="2019-10-05T06:33:42.119Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="我的云笔记">
-<meta name="twitter:description" content="准备工作 master01:192.168.1.110 node01:192.168.1.106 关闭防火墙 12systemctl disable firewalldiptables -F yum安装 master 192.168.1.110 1yum install kubernetes-master etcd -y 配置 vim /etc/etcd/etcd.conf 1234567ETCD">
+<meta name="twitter:title" content="kubernetes安装">
+<meta name="twitter:description" content="kuberneteskubernetes">
 
 
 
@@ -136,7 +136,7 @@
   };
 </script>
 
-  <title> | 我的云笔记</title>
+  <title>kubernetes安装 | 我的云笔记</title>
   
 
 
@@ -347,7 +347,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
+          <h1 class="post-title" itemprop="name headline">kubernetes安装
               
             
           </h1>
@@ -389,7 +389,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-02-03 21:36:35" itemprop="dateModified" datetime="2019-02-03T21:36:35+08:00">2019-02-03</time>
+                <time title="修改时间：2019-10-05 14:33:42" itemprop="dateModified" datetime="2019-10-05T14:33:42+08:00">2019-10-05</time>
               
             
           </span>
@@ -420,7 +420,7 @@
 
           
           
-             <span id="/blog/kubernets/kubernets安装/" class="leancloud_visitors" data-flag-title="">
+             <span id="/blog/kubernets/kubernets安装/" class="leancloud_visitors" data-flag-title="kubernetes安装">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -451,7 +451,9 @@
       
 
       
-        <p>准备工作</p>
+        <p>kuberneteskubernetes</p>
+<a id="more"></a>
+<p>准备工作</p>
 <p>master01:192.168.1.110</p>
 <p>node01:192.168.1.106</p>
 <p>关闭防火墙</p>
@@ -486,7 +488,6 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl config set-cluster kubernetes --server=http://192.168.1.110:8080</span><br><span class="line">kubectl config set-context kubernetes --cluster=kubernetes</span><br><span class="line">kubectl config use-context kubernetes</span><br></pre></td></tr></table></figure>
 <p>dashboard</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull docker.io/mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line">docker tag docker.io/mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1  k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1</span><br></pre></td></tr></table></figure>
-<a id="more"></a>
 <p>etcd</p>
 <p>启动慢</p>
 <p>​    确认防火墙是否关闭</p>
