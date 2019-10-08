@@ -108,13 +108,13 @@
 
 
 
-  <meta name="description" content="Prometheus安装和基础配置">
+  <meta name="description" content="Prometheus安装和基础配置，包括node-exporter，pushgateway和grafana的使用">
 <meta name="keywords" content="Prometheus,grafana">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Prometheus入门">
 <meta property="og:url" content="http://yoursite.com/监控/Prometheus入门/index.html">
 <meta property="og:site_name" content="我的云笔记">
-<meta property="og:description" content="Prometheus安装和基础配置">
+<meta property="og:description" content="Prometheus安装和基础配置，包括node-exporter，pushgateway和grafana的使用">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/blog/images/1570465141794.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1570465551461.png">
@@ -126,10 +126,10 @@
 <meta property="og:image" content="http://yoursite.com/blog/images/1570467291591.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1570467376019.png">
 <meta property="og:image" content="http://yoursite.com/blog/images/1570469245788.png">
-<meta property="og:updated_time" content="2019-10-07T17:28:18.819Z">
+<meta property="og:updated_time" content="2019-10-07T17:34:20.951Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Prometheus入门">
-<meta name="twitter:description" content="Prometheus安装和基础配置">
+<meta name="twitter:description" content="Prometheus安装和基础配置，包括node-exporter，pushgateway和grafana的使用">
 <meta name="twitter:image" content="http://yoursite.com/blog/images/1570465141794.png">
 
 
@@ -400,7 +400,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-10-08 01:28:18" itemprop="dateModified" datetime="2019-10-08T01:28:18+08:00">2019-10-08</time>
+                <time title="修改时间：2019-10-08 01:34:20" itemprop="dateModified" datetime="2019-10-08T01:34:20+08:00">2019-10-08</time>
               
             
           </span>
@@ -462,7 +462,7 @@
       
 
       
-        <p> Prometheus安装和基础配置</p>
+        <p> Prometheus安装和基础配置，包括node-exporter，pushgateway和grafana的使用</p>
 <a id="more"></a>
 <h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><h2 id="Prometheus"><a href="#Prometheus" class="headerlink" title="Prometheus"></a>Prometheus</h2><p>数据存放路径：/home/data/prometheus</p>
 <p>配置文件：prometheus.yml</p>
@@ -507,7 +507,7 @@
 <p>最终显示效果</p>
 <p><img src="/blog/images/1570469245788.png" alt="1570469170274"></p>
 <p>实际收到的报警信息，state=alerting，当cpu恢复正常后会收到一条相同的信息，但state=ok</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//报警</span></span><br><span class="line">&#123;</span><br><span class="line">			<span class="string">"ruleName"</span>:<span class="string">"cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"state"</span>:<span class="string">"alerting"</span>,</span><br><span class="line">			<span class="string">"message"</span>:<span class="string">"cpu占用过高"</span>,</span><br><span class="line">			<span class="string">"ruleId"</span>:<span class="number">1</span>,</span><br><span class="line">			<span class="string">"title"</span>:<span class="string">"[Alerting] cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"ruleUrl"</span>:<span class="string">"http://localhost:3000/dashboard/db/cpushi-yong-lu?fullscreen&amp;edit&amp;tab=alert&amp;panelId=1"</span>,</span><br><span class="line">			<span class="string">"evalMatches"</span>:[</span><br><span class="line">				&#123;</span><br><span class="line">					<span class="string">"metric"</span>:<span class="string">"myos"</span>,</span><br><span class="line">					<span class="string">"value"</span>:<span class="number">67.42521121150497</span></span><br><span class="line">				&#125;</span><br><span class="line">			]</span><br><span class="line">		&#125;</span><br><span class="line"><span class="comment">//恢复</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">			<span class="string">"ruleName"</span>:<span class="string">"cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"state"</span>:<span class="string">"ok"</span>,</span><br><span class="line">			<span class="string">"message"</span>:<span class="string">"cpu占用过高"</span>,</span><br><span class="line">			<span class="string">"ruleId"</span>:<span class="number">1</span>,</span><br><span class="line">			<span class="string">"title"</span>:<span class="string">"[OK] cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"ruleUrl"</span>:<span class="string">"http://localhost:3000/dashboard/db/cpushi-yong-lu?fullscreen&amp;edit&amp;tab=alert&amp;panelId=1"</span>,</span><br><span class="line">			<span class="string">"evalMatches"</span>:[]</span><br><span class="line">		&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//报警</span></span><br><span class="line">&#123;</span><br><span class="line">			<span class="string">"ruleName"</span>:<span class="string">"cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"state"</span>:<span class="string">"alerting"</span>,</span><br><span class="line">			<span class="string">"message"</span>:<span class="string">"cpu占用过高"</span>,</span><br><span class="line">			<span class="string">"ruleId"</span>:<span class="number">1</span>,</span><br><span class="line">			<span class="string">"title"</span>:<span class="string">"[Alerting] cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"ruleUrl"</span>:<span class="string">"http://localhost:3000/dashboard/db/cpushi-yong-lu?fullscreen&amp;edit&amp;tab=alert&amp;panelId=1"</span>,</span><br><span class="line">			<span class="string">"evalMatches"</span>:[</span><br><span class="line">				&#123;</span><br><span class="line">					<span class="string">"metric"</span>:<span class="string">"myos"</span>,</span><br><span class="line">					<span class="string">"value"</span>:<span class="number">67.42521121150497</span></span><br><span class="line">				&#125;</span><br><span class="line">			]</span><br><span class="line">		&#125;</span><br><span class="line"><span class="comment">//恢复</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">			<span class="string">"ruleName"</span>:<span class="string">"cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"state"</span>:<span class="string">"ok"</span>,</span><br><span class="line">			<span class="string">"message"</span>:<span class="string">"cpu占用过高"</span>,</span><br><span class="line">			<span class="string">"ruleId"</span>:<span class="number">1</span>,</span><br><span class="line">			<span class="string">"title"</span>:<span class="string">"[OK] cpu使用率报警"</span>,</span><br><span class="line">			<span class="string">"ruleUrl"</span>:<span class="string">"http://localhost:3000/dashboard/db/cpushi-yong-lu?fullscreen&amp;edit&amp;tab=alert&amp;panelId=1"</span>,</span><br><span class="line">			<span class="string">"evalMatches"</span>:[]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -552,6 +552,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/监控/业务监控/" rel="prev" title="业务监控">
+                业务监控 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -621,7 +625,7 @@
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">53</span>
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -805,7 +809,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">50</span>
+                      
+                    
+                    <span class="site-state-item-count">51</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
