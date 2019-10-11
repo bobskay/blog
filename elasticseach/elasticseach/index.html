@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="我的云笔记">
 <meta property="og:description" content="elasticsearch使用">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-10-05T12:14:53.193Z">
+<meta property="og:updated_time" content="2019-10-10T08:05:14.002Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="elasticsearch">
 <meta name="twitter:description" content="elasticsearch使用">
@@ -389,7 +389,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-10-05 20:14:53" itemprop="dateModified" datetime="2019-10-05T20:14:53+08:00">2019-10-05</time>
+                <time title="修改时间：2019-10-10 16:05:14" itemprop="dateModified" datetime="2019-10-10T16:05:14+08:00">2019-10-10</time>
               
             
           </span>
@@ -471,7 +471,7 @@
 <p><a href="http://127.0.0.1:9100/" target="_blank" rel="noopener">http://127.0.0.1:9100/</a></p>
 <h1 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h1><h2 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET _cat/health?v</span><br></pre></td></tr></table></figure>
 <figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">epoch      timestamp cluster       status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent</span><br><span class="line">1547428524 01:15:24  elasticsearch green           1         1      0   0    0    0        0             0                  -                100.0<span class="comment">%</span></span><br></pre></td></tr></table></figure>
-<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><h3 id="设置mapping"><a href="#设置mapping" class="headerlink" title="设置mapping"></a>设置mapping</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">PUT store</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"mappings"</span>:&#123;</span><br><span class="line">    <span class="attr">"book"</span>: &#123;</span><br><span class="line">       <span class="attr">"properties"</span>: &#123;</span><br><span class="line">          <span class="attr">"bookId"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"long"</span>&#125;,</span><br><span class="line">          <span class="attr">"bookName"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">          <span class="attr">"publishDate"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"date"</span>,</span><br><span class="line">			<span class="attr">"format"</span>: <span class="string">"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"description"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">			<span class="attr">"analyzer"</span>: <span class="string">"ik_max_word"</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">		  <span class="attr">"isbn"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">		  <span class="attr">"tags"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>:<span class="string">"keyword"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"price"</span>:&#123;<span class="attr">"type"</span>:<span class="string">"long"</span>&#125;</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><h3 id="设置mapping"><a href="#设置mapping" class="headerlink" title="设置mapping"></a>设置mapping</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">PUT store</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"mappings"</span>:&#123;</span><br><span class="line">    <span class="attr">"book"</span>: &#123;</span><br><span class="line">       <span class="attr">"properties"</span>: &#123;</span><br><span class="line">          <span class="attr">"bookId"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"long"</span>&#125;,</span><br><span class="line">          <span class="attr">"bookName"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">          <span class="attr">"publishDate"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>: <span class="string">"date"</span>,</span><br><span class="line">			<span class="attr">"format"</span>: <span class="string">"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"description"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"text"</span>,</span><br><span class="line">			<span class="attr">"analyzer"</span>: <span class="string">"ik_max_word"</span></span><br><span class="line">          &#125;,</span><br><span class="line">		  <span class="attr">"isbn"</span>: &#123;<span class="attr">"type"</span>: <span class="string">"text"</span>&#125;,</span><br><span class="line">		  <span class="attr">"tags"</span>: &#123;</span><br><span class="line">			<span class="attr">"type"</span>:<span class="string">"keyword"</span></span><br><span class="line">		  &#125;,</span><br><span class="line">		  <span class="attr">"price"</span>:&#123;<span class="attr">"type"</span>:<span class="string">"long"</span>&#125;</span><br><span class="line">       &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="新增数据"><a href="#新增数据" class="headerlink" title="新增数据"></a>新增数据</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">PUT /store/book/1</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">1</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"深入理解虚拟机"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价100的java图书,包含虚拟机"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">100</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>,<span class="string">"虚拟机"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PUT /store/book/2</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">2</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"java最佳实践"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价200的java图书"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">200</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">PUT /store/book/3</span><br><span class="line">&#123;</span><br><span class="line">	<span class="attr">"bookId"</span>:<span class="number">2</span>,</span><br><span class="line">	<span class="attr">"bookName"</span>:<span class="string">"设计模式与java"</span>,</span><br><span class="line">	<span class="attr">"description"</span>:<span class="string">"售价300的java图书,关于设计模式的"</span>,</span><br><span class="line">	<span class="attr">"isbn"</span>:<span class="string">"11233123"</span>,</span><br><span class="line">	<span class="attr">"price"</span>:<span class="number">200</span>,</span><br><span class="line">	<span class="attr">"publishDate"</span>:<span class="number">1547430116594</span>,</span><br><span class="line">	<span class="attr">"tags"</span>:[<span class="string">"java"</span>,<span class="string">"设计模式"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="删"><a href="#删" class="headerlink" title="删"></a>删</h2><h2 id="改"><a href="#改" class="headerlink" title="改"></a>改</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">POST /store/book/1/_update</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"doc"</span>: </span><br><span class="line">  &#123;</span><br><span class="line">	  <span class="attr">"description"</span>:<span class="string">"更新后的描述信息"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><h3 id="查询全部"><a href="#查询全部" class="headerlink" title="查询全部"></a>查询全部</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /store/book/_search</span><br></pre></td></tr></table></figure>
@@ -537,8 +537,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/code/日志收集器/" rel="prev" title="日志收集器">
-                日志收集器 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/elasticseach/docker安装elasticseach/" rel="prev" title="docker安装elasticsearch">
+                docker安装elasticsearch <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -609,7 +609,7 @@
                 
                   <a href="/blog/archives">
                 
-                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-count">58</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -680,7 +680,17 @@
                     
                       
                     
-                    <span class="site-state-item-count">29</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">34</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -795,7 +805,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">51</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">54</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
