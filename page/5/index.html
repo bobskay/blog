@@ -326,6 +326,677 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/design/singleton/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/design/singleton/" itemprop="url">
+                  Singleton的double check问题
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-17 06:24:56 / 修改时间：10:25:39" itemprop="dateCreated datePublished" datetime="2019-01-17T06:24:56+08:00">2019-01-17</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/design/" itemprop="url" rel="index"><span itemprop="name">design</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/design/singleton/" class="leancloud_visitors" data-flag-title="Singleton的double check问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>创建单例对象如果用double check方式，会存在不安全的情况，简单说法是给对象加上volatile关键字，</p>
+<p>具体原因牵扯到比较多，下面具体说明，先看代码</p>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><p>创建10个线程，同时调用getInstance()方法获取单例对象</p>
+<p>getInstance方法，创建对象的过程为</p>
+<p>1.判断对象是否为null</p>
+<p>2.获得锁</p>
+<p>3.再次判断对象是否为null</p>
+<p>4.创建对象</p>
+<p>5.初始化对象内部数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line">    <span class="keyword">private</span> String initThreadName;<span class="comment">//记录单例对象是由哪个线程创建的</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;<span class="comment">//1</span></span><br><span class="line">            debug(<span class="string">"singleton不为null,直接返回"</span>);</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">        debug(<span class="string">"singleton为null,准备获得锁"</span>);</span><br><span class="line">        <span class="keyword">synchronized</span> (Singleton.class) &#123;<span class="comment">//2</span></span><br><span class="line">            <span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;<span class="comment">//3</span></span><br><span class="line">                debug(<span class="string">"获得锁后发现singleton已经创建,直接返回"</span>);</span><br><span class="line">                <span class="keyword">return</span> singleton;</span><br><span class="line">            &#125;</span><br><span class="line">            debug(<span class="string">"singleton为null,开始执行创建"</span>);</span><br><span class="line">            singleton = <span class="keyword">new</span> Singleton();<span class="comment">//4</span></span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);<span class="comment">//假装对象创建比较耗时</span></span><br><span class="line">            singleton.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line">            debug(<span class="string">"-----singleton创建完毕-------"</span>);</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//创建10个线程,同时调用getInstance()</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        List&lt;Thread&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        CountDownLatch c = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            Runnable run = () -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    debug(<span class="string">"线程创建完毕等待执行"</span>);</span><br><span class="line">                    c.await();<span class="comment">//等待线程全部到达</span></span><br><span class="line">                    debug(<span class="string">"准备获取对象"</span>);</span><br><span class="line">                    Singleton singleton = Singleton.getInstance();</span><br><span class="line">                    debug(<span class="string">"获得单例对象,该对象是由线程"</span> + singleton.initThreadName + <span class="string">"创建的"</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="keyword">new</span> Thread(run, <span class="string">"thread"</span> + i).start();</span><br><span class="line">        &#125;</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        c.countDown();</span><br><span class="line">        Thread.sleep(<span class="number">5000</span>);</span><br><span class="line">        Singleton.getInstance();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">long</span> start = System.currentTimeMillis();<span class="comment">//记录启动时间</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">debug</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.println(System.currentTimeMillis() - start + <span class="string">"|"</span> + Thread.currentThread().getName() + <span class="string">":"</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="执行日志"><a href="#执行日志" class="headerlink" title="执行日志"></a>执行日志</h1><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">48</span>|thread0:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread2:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread1:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread3:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread4:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread5:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread6:线程创建完毕等待执行</span><br><span class="line"><span class="number">48</span>|thread9:线程创建完毕等待执行</span><br><span class="line"><span class="number">49</span>|thread7:线程创建完毕等待执行</span><br><span class="line"><span class="number">49</span>|thread8:线程创建完毕等待执行</span><br><span class="line"><span class="number">149</span>|thread0:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread1:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread5:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread9:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread9:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread9:singleton为null,开始执行创建</span><br><span class="line"><span class="number">149</span>|thread2:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread2:singleton不为null,直接返回</span><br><span class="line"><span class="number">149</span>|thread2:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread8:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread7:准备获取对象</span><br><span class="line"><span class="number">149</span>|thread5:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread6:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread6:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread6:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread1:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread4:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread4:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread4:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread0:singleton为null,准备获得锁</span><br><span class="line"><span class="number">149</span>|thread3:准备获取对象</span><br><span class="line"><span class="number">150</span>|thread3:singleton不为null,直接返回</span><br><span class="line"><span class="number">149</span>|thread7:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread7:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">149</span>|thread8:singleton不为null,直接返回</span><br><span class="line"><span class="number">150</span>|thread3:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">150</span>|thread8:获得单例对象,该对象是由线程null创建的</span><br><span class="line"><span class="number">2150</span>|thread9:-----singleton创建完毕-------</span><br><span class="line"><span class="number">2150</span>|thread9:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread0:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread0:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread1:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread1:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">2150</span>|thread5:获得锁后发现singleton已经创建,直接返回</span><br><span class="line"><span class="number">2150</span>|thread5:获得单例对象,该对象是由线程thread9创建的</span><br><span class="line"><span class="number">5150</span>|main:singleton不为null,直接返回</span><br><span class="line"><span class="number">5162</span>|main:获得单例对象,该对象是由线程thread9创建的</span><br></pre></td></tr></table></figure>
+<h1 id="实际执行过程"><a href="#实际执行过程" class="headerlink" title="实际执行过程"></a>实际执行过程</h1><h2 id="第一批线程"><a href="#第一批线程" class="headerlink" title="第一批线程"></a>第一批线程</h2><p>thread9获得锁，执行到第4步后开始等待</p>
+<h2 id="第二批线程"><a href="#第二批线程" class="headerlink" title="第二批线程"></a>第二批线程</h2><p>thread2，thread6，thread4，thread3，thread7，thread8执行到第1步发现对象不为null，就直接返回了，但这时候initThreadName属性还没赋值，所以拿到对象后打印出来的信息为</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">singleton不为null,直接返回</span><br><span class="line">获得单例对象,该对象是由线程null创建的</span><br></pre></td></tr></table></figure>
+<h2 id="第三批线程"><a href="#第三批线程" class="headerlink" title="第三批线程"></a>第三批线程</h2><p>thread0,thread1,thread5执行到第2步后开始等待，等到thread9释放锁后在第3步返回，因此他们得到的信息是正确的</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">获得锁后发现singleton已经创建,直接返回</span><br><span class="line">获得单例对象,该对象是由线程thread9创建的</span><br></pre></td></tr></table></figure>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>第二批线程获取对象的时候，虽然singleton不为null，但里面的属性还未赋值，所以拿到对象后立即操作就会出现问题，如前所述发现initThreadName是null</p>
+<h1 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h1><p>创建一个临时对象，先初始化完毕后再赋值给singleton，简单来说就是讲4，5两步对调</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//原代码</span></span><br><span class="line">singleton = <span class="keyword">new</span> Singleton();<span class="comment">//4</span></span><br><span class="line">singleton.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//新代码</span></span><br><span class="line">Singleton temp= <span class="keyword">new</span> Singleton();</span><br><span class="line">temp.initThreadName = Thread.currentThread().getName();<span class="comment">//5</span></span><br><span class="line">singleton=temp;<span class="comment">//4</span></span><br></pre></td></tr></table></figure>
+<p>通常来说，大部分情况下是没问题的，但理论上不是这样，写线程和读线程看到的singleton对象，对于计算机来说不是同一个</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//写线程，在写线程的工作内存为singleton赋值后，需要将这份数据赋值到主内存</span></span><br><span class="line">singleton=temp;</span><br><span class="line"><span class="comment">//读线程，需要将主内存的数据复制到当前工作线程，然后才能判断数据是否为null</span></span><br><span class="line"><span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;</span><br></pre></td></tr></table></figure>
+<p>这里牵扯到java内存模型的问题，java线程是不能直接操作主内存的，每个线程都只能修改自己工作内存，然后将值复制到主内存</p>
+<p><img src="/blog/images/20160127101418421" alt="这里写图片描述"></p>
+<p>singleton=temp虽然只有一句，但需要在2个地方写数据，再加上写操作本身就需要store和write</p>
+<figure class="highlight tex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">JAVA内存模型规定工作内存与主内存之间的交互协议，其中包括8种原子操作：</span><br><span class="line">1）lock(锁定)：将一个变量标识为被一个线程独占状态。</span><br><span class="line">2）unlock(解锁)：将一个变量从独占状态释放出来，释放后的变量才可以被其他线程锁定。</span><br><span class="line">3）read(读取)：将一个变量的值从主内存传输到工作内存中，以便随后的load操作。</span><br><span class="line">4）load(载入)：把read操作从主内存中得到的变量值放入工作内存的变量的副本中。</span><br><span class="line">5）use(使用)：把工作内存中的一个变量的值传给执行引擎，每当虚拟机遇到一个使用到变量的指令时都会使用该指令。</span><br><span class="line">6）assign(赋值)：把一个从执行引擎接收到的值赋给工作内存中的变量，每当虚拟机遇到一个给变量赋值的指令时，都要使用该操作。</span><br><span class="line">7）store(存储)：把工作内存中的一个变量的值传递给主内存，以便随后的write操作。</span><br><span class="line">8）write(写入)：把store操作从工作内存中得到的变量的值写到主内存中的变量</span><br></pre></td></tr></table></figure>
+<p>简单来说，多线程环境下，一个线程修改了singleton的信息，另一个线程并不能马上知道完整信息，理论上虽然</p>
+<p>if (singleton != null) 判断为true，但线程所获得的singleton 仍然有可能是不完整的</p>
+<h2 id="Volatile测试"><a href="#Volatile测试" class="headerlink" title="Volatile测试"></a>Volatile测试</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VolatileTest</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span>  <span class="keyword">int</span> value = <span class="number">0</span>;<span class="comment">//不加volatile关键字,监听线程是感知不到value值变化的</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable change=()-&gt;&#123;</span><br><span class="line">            <span class="keyword">try</span>&#123;</span><br><span class="line">                <span class="keyword">while</span> (value&lt;<span class="number">5</span>)&#123;</span><br><span class="line">                    Thread.sleep(<span class="number">100</span>);</span><br><span class="line">                    value++;</span><br><span class="line">                    System.out.println(<span class="string">"修改线程将value修改为:"</span>+value);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;<span class="keyword">catch</span> (Exception ex)&#123;</span><br><span class="line">                ex.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        Runnable chanListener=()-&gt;&#123;</span><br><span class="line">            <span class="keyword">int</span> local=value;</span><br><span class="line">            <span class="keyword">while</span> (value &lt; <span class="number">5</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span>(local!=value)&#123;</span><br><span class="line">                    System.out.println(<span class="string">"监听线程发现value已经改变:"</span> +value+<span class="string">"!="</span>+local);</span><br><span class="line">                    local = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">new</span> Thread(chanListener,<span class="string">"chanListener"</span>).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(change,<span class="string">"change"</span>).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>所以使用double check方式生成单例需要注意</p>
+<p>1.singleton所有初始化工作需要在赋值之前</p>
+<p>2.singleton变量需要加上volatile关键字</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;<span class="comment">//变量设置为volatile</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    	...</span><br><span class="line">        Singleton temp= <span class="keyword">new</span> Singleton();</span><br><span class="line">        <span class="comment">//初始化所需的其它字段</span></span><br><span class="line">        ...</span><br><span class="line">        singleton=temp;<span class="comment">//将完整对象赋值给singleton</span></span><br><span class="line">    &#125;         </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然创建单例的方式有很多种，实际工作中可以用恶汉模式，或者内部类方式，通过内部类方式实现代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> thread.innerclass;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String initThreadName;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonHandler</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = init();</span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Singleton <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"初始化singleton"</span>);</span><br><span class="line">            Singleton singleton= <span class="keyword">new</span> Singleton();</span><br><span class="line">            singleton.initThreadName=Thread.currentThread().getName();</span><br><span class="line">            <span class="keyword">return</span> singleton;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingletonHandler.singleton;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        debug(<span class="string">"只执行静态方法是不会加载对象的"</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;Thread&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        CountDownLatch c = <span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            Runnable run = () -&gt; &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    debug(<span class="string">"线程创建完毕等待执行"</span>);</span><br><span class="line">                    c.await();<span class="comment">//等待线程全部到达</span></span><br><span class="line">                    debug(<span class="string">"准备获取对象"</span>);</span><br><span class="line">                    Singleton singleton = getInstance();</span><br><span class="line">                    debug(<span class="string">"获得单例对象,该对象是由线程"</span> + singleton.initThreadName + <span class="string">"创建的"</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="keyword">new</span> Thread(run, <span class="string">"thread"</span> + i).start();</span><br><span class="line">        &#125;</span><br><span class="line">        Thread.sleep(<span class="number">100</span>);</span><br><span class="line">        c.countDown();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">long</span> start = System.currentTimeMillis();<span class="comment">//记录启动时间</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">debug</span><span class="params">(String msg)</span> </span>&#123;</span><br><span class="line">        System.out.println(System.currentTimeMillis() - start + <span class="string">"|"</span> + Thread.currentThread().getName() + <span class="string">":"</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/design/singleton/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/java/develop/数据结构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/code/java/develop/数据结构/" itemprop="url">
+                  java数据结构
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-27 17:27:11" itemprop="dateCreated datePublished" datetime="2018-07-27T17:27:11+08:00">2018-07-27</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-01-06 18:36:02" itemprop="dateModified" datetime="2019-01-06T18:36:02+08:00">2019-01-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/code/java/develop/数据结构/" class="leancloud_visitors" data-flag-title="java数据结构">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>java.util包下经常使用到的类，先写个目录，后续补充</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/code/java/develop/数据结构/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/java/jdkvision/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/blog/java/jdkvision/" itemprop="url">
+                  jdk各个版本日期
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-01-04 11:09:48 / 修改时间：11:15:41" itemprop="dateCreated datePublished" datetime="2019-01-04T11:09:48+08:00">2019-01-04</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/blog/java/jdkvision/" class="leancloud_visitors" data-flag-title="jdk各个版本日期">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <table>
+<thead>
+<tr>
+<th>版本</th>
+<th>名称</th>
+<th>发行日期</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 1.1.4</td>
+<td>Sparkler（宝石）</td>
+<td>1997-09-12</td>
+</tr>
+<tr>
+<td>JDK 1.1.5</td>
+<td>Pumpkin（南瓜）</td>
+<td>1997-12-13</td>
+</tr>
+<tr>
+<td>JDK 1.1.6</td>
+<td>Abigail（阿比盖尔–女子名）</td>
+<td>1998-04-24</td>
+</tr>
+<tr>
+<td>JDK 1.1.7</td>
+<td>Brutus（布鲁图–古罗马政治家和将军）</td>
+<td>1998-09-28</td>
+</tr>
+<tr>
+<td>JDK 1.1.8</td>
+<td>Chelsea（切尔西–城市名）</td>
+<td>1999-04-08</td>
+</tr>
+<tr>
+<td>J2SE 1.2</td>
+<td>Playground（运动场）</td>
+<td>1998-12-04</td>
+</tr>
+<tr>
+<td>J2SE 1.2.1</td>
+<td>none（无）</td>
+<td>1999-03-30</td>
+</tr>
+<tr>
+<td>J2SE 1.2.2</td>
+<td>Cricket（蟋蟀）</td>
+<td>1999-07-08</td>
+</tr>
+<tr>
+<td>J2SE 1.3</td>
+<td>Kestrel（美洲红隼）</td>
+<td>2000-05-08</td>
+</tr>
+<tr>
+<td>J2SE 1.3.1</td>
+<td>Ladybird（瓢虫）</td>
+<td>2001-05-17</td>
+</tr>
+<tr>
+<td>J2SE 1.4.0</td>
+<td>Merlin（灰背隼）</td>
+<td>2002-02-13</td>
+</tr>
+<tr>
+<td>J2SE 1.4.1</td>
+<td>grasshopper（蚱蜢）</td>
+<td>2002-09-16</td>
+</tr>
+<tr>
+<td>J2SE 1.4.2</td>
+<td>Mantis（螳螂）</td>
+<td>2003-06-26</td>
+</tr>
+<tr>
+<td>Java SE 5.0 (1.5.0)</td>
+<td>Tiger（老虎）</td>
+<td>2004-09-30</td>
+</tr>
+<tr>
+<td>Java SE 6.0 (1.6.0)</td>
+<td>Mustang（野马）</td>
+<td>2006-04</td>
+</tr>
+<tr>
+<td>Java SE 7.0 (1.7.0)</td>
+<td>Dolphin（海豚）</td>
+<td>2011-07-28</td>
+</tr>
+<tr>
+<td>Java SE 8.0 (1.8.0)</td>
+<td>Spider（蜘蛛）</td>
+<td>2014-03-18</td>
+</tr>
+<tr>
+<td>Java SE 9.0</td>
+<td></td>
+<td>2017-09-21</td>
+</tr>
+</tbody>
+</table>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/blog/java/jdkvision/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/docker/docker/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -767,193 +1438,6 @@
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/blog/uncategorized/rocketmq个人定制/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/design/监控方案/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/design/监控方案/" itemprop="url">
-                  监控系统设计
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-08-14 17:42:01" itemprop="dateCreated datePublished" datetime="2018-08-14T17:42:01+08:00">2018-08-14</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-08-15 16:05:11" itemprop="dateModified" datetime="2018-08-15T16:05:11+08:00">2018-08-15</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/design/" itemprop="url" rel="index"><span itemprop="name">design</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/design/监控方案/" class="leancloud_visitors" data-flag-title="监控系统设计">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>监控的重要性不言而喻，系统许多优化都必须建立在实际数据的基础上。</p>
-<p>然而监控范围，监控频率以及监控数据保存时间一直是令人头疼的问题。</p>
-<p>理想情况当然是越精确越好，但由于收性能和存储所限，往往都要对其中一部分做一些取舍</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/design/监控方案/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1648,378 +2132,6 @@
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/blog/code/markdown/markdown画图模板/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/spring/pointcut/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/code/spring/pointcut/" itemprop="url">
-                  Pointcut配置
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-08-02 23:08:13" itemprop="dateCreated datePublished" datetime="2018-08-02T23:08:13+08:00">2018-08-02</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-08-03 08:58:05" itemprop="dateModified" datetime="2018-08-03T08:58:05+08:00">2018-08-03</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/code/spring/pointcut/" class="leancloud_visitors" data-flag-title="Pointcut配置">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Pointcut配置，<a href="https://docs.spring.io/spring/docs/current/spring-framework-reference/core.html#aop-ataspectj" target="_blank" rel="noopener">官方文档</a></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/code/spring/pointcut/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/blog/code/springboot/多数据源/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/blog/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/blog/code/springboot/多数据源/" itemprop="url">
-                  springboot多数据源
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-08-02 19:01:30 / 修改时间：22:51:17" itemprop="dateCreated datePublished" datetime="2018-08-02T19:01:30+08:00">2018-08-02</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/" itemprop="url" rel="index"><span itemprop="name">code</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/code/springboot/" itemprop="url" rel="index"><span itemprop="name">springboot</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/blog/code/springboot/多数据源/" class="leancloud_visitors" data-flag-title="springboot多数据源">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>个人笔记</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/blog/code/springboot/多数据源/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>

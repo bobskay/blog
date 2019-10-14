@@ -117,7 +117,7 @@
 <meta property="og:description" content="简述java的类加载器和类加载过程">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/blog/images/20170430160610299.png">
-<meta property="og:updated_time" content="2018-07-30T13:04:15.597Z">
+<meta property="og:updated_time" content="2019-10-14T03:48:27.143Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="类加载器">
 <meta name="twitter:description" content="简述java的类加载器和类加载过程">
@@ -374,12 +374,24 @@
                 
               
 
-              <time title="创建时间：2018-07-30 18:01:30 / 修改时间：21:04:15" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
+              <time title="创建时间：2018-07-30 18:01:30" itemprop="dateCreated datePublished" datetime="2018-07-30T18:01:30+08:00">2018-07-30</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-10-14 11:48:27" itemprop="dateModified" datetime="2019-10-14T11:48:27+08:00">2019-10-14</time>
               
             
           </span>
@@ -462,6 +474,14 @@
 <h1 id="类加载"><a href="#类加载" class="headerlink" title="类加载"></a>类加载</h1><h2 id="启动（Bootstrap）类加载器"><a href="#启动（Bootstrap）类加载器" class="headerlink" title="启动（Bootstrap）类加载器"></a>启动（Bootstrap）类加载器</h2><p>启动类加载器主要加载的是JVM自身需要的类，这个类加载使用C++语言实现的，是虚拟机自身的一部分，它负责将 <code>&lt;JAVA_HOME&gt;/lib</code>路径下的核心类库或<code>-Xbootclasspath</code>参数指定的路径下的jar包加载到内存中，注意必由于虚拟机是按照文件名识别加载jar包的，如rt.jar，如果文件名不被虚拟机识别，即使把jar包丢到lib目录下也是没有作用的(出于安全考虑，Bootstrap启动类加载器只加载包名为java、javax、sun等开头的类)。</p>
 <h2 id="扩展（ExtClassLoader-）类加载器"><a href="#扩展（ExtClassLoader-）类加载器" class="headerlink" title="扩展（ExtClassLoader ）类加载器"></a>扩展（ExtClassLoader ）类加载器</h2><p>扩展类加载器是指Sun公司(已被Oracle收购)实现的<code>sun.misc.Launcher$ExtClassLoader</code>类，由Java语言实现的，是Launcher的静态内部类，它负责加载<code>&lt;JAVA_HOME&gt;/lib/ext</code>目录下或者由系统变量-Djava.ext.dir指定位路径中的类库，开发者可以直接使用标准扩展类加载器。</p>
 <h2 id="系统（AppClassLoader-）类加载器"><a href="#系统（AppClassLoader-）类加载器" class="headerlink" title="系统（AppClassLoader ）类加载器"></a>系统（AppClassLoader ）类加载器</h2><p>也称应用程序加载器是指 Sun公司实现的<code>sun.misc.Launcher$AppClassLoader</code>。它负责加载系统类路径<code>java -classpath</code>或<code>-D java.class.path</code> 指定路径下的类库，也就是我们经常用到的classpath路径，开发者可以直接使用系统类加载器，一般情况下该类加载是程序中默认的类加载器，通过<code>ClassLoader#getSystemClassLoader()</code>方法可以获取到该类加载器。 </p>
+<h1 id="自定义类加载器"><a href="#自定义类加载器" class="headerlink" title="自定义类加载器"></a>自定义类加载器</h1><h2 id="双亲委派模型（parental-appointment）"><a href="#双亲委派模型（parental-appointment）" class="headerlink" title="双亲委派模型（parental appointment）"></a>双亲委派模型（parental appointment）</h2><p>ExtClassLoader 和AppClassLoader 都是Launcher的内部类，系统启动的时候会初始化这两个类加载器，并将AppClassLoader 的parent设置为ExtClassLoader </p>
+<p>我们写的类继承自ClassLoader，他的parent为</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    System.out.println(myClassloader.getParent());<span class="comment">//AppClassLoader</span></span><br><span class="line">    System.out.println(myClassloader.getParent().getParent());<span class="comment">//ExtClassLoader</span></span><br><span class="line">    System.out.println(myClassloader.getParent().getParent().getParent());<span class="comment">//null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>虚拟机加载类的时候 会调用java.lang.ClassLoader#loadClass</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="keyword">boolean</span> resolve)&#123;</span><br><span class="line">    <span class="keyword">if</span> (parent != <span class="keyword">null</span>) &#123;</span><br><span class="line">        c = parent.loadClass(name, <span class="keyword">false</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        c = findBootstrapClassOrNull(name);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果都没找到就自己加载</span></span><br><span class="line">    <span class="keyword">if</span>( c ==<span class="keyword">null</span>)&#123;</span><br><span class="line">        c = findClass(name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果parent不为空会调用parent的loadClass，否则调用java.lang.ClassLoader.findBootstrapClass用Bootstrap类加载器加载。</p>
+<p>如果都找不到才调用findClass自己加载</p>
+<p>所以要破坏双亲委派模型就重写loadClass，不想破坏就重写findClass</p>
 
       
     </div>
@@ -819,7 +839,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载过程"><span class="nav-number">1.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载"><span class="nav-number">2.</span> <span class="nav-text">类加载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动（Bootstrap）类加载器"><span class="nav-number">2.1.</span> <span class="nav-text">启动（Bootstrap）类加载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展（ExtClassLoader-）类加载器"><span class="nav-number">2.2.</span> <span class="nav-text">扩展（ExtClassLoader ）类加载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统（AppClassLoader-）类加载器"><span class="nav-number">2.3.</span> <span class="nav-text">系统（AppClassLoader ）类加载器</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载过程"><span class="nav-number">1.</span> <span class="nav-text">类加载过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载"><span class="nav-number">2.</span> <span class="nav-text">类加载</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动（Bootstrap）类加载器"><span class="nav-number">2.1.</span> <span class="nav-text">启动（Bootstrap）类加载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展（ExtClassLoader-）类加载器"><span class="nav-number">2.2.</span> <span class="nav-text">扩展（ExtClassLoader ）类加载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统（AppClassLoader-）类加载器"><span class="nav-number">2.3.</span> <span class="nav-text">系统（AppClassLoader ）类加载器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义类加载器"><span class="nav-number">3.</span> <span class="nav-text">自定义类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#双亲委派模型（parental-appointment）"><span class="nav-number">3.1.</span> <span class="nav-text">双亲委派模型（parental appointment）</span></a></li></ol></li></ol></div>
             
 
           </div>
